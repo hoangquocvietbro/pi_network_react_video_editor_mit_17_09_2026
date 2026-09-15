@@ -1,0 +1,186 @@
+{
+  "id": "render_1774755186015_7tdivnh",
+  "design": {
+    "id": "NhJsnFkMcvNjnYOS",
+    "fps": 30,
+    "tracks": [
+      {
+        "id": "Ua60qCcEL5MJdpvyN0-e_",
+        "accepts": [
+          "text",
+          "image",
+          "video",
+          "audio",
+          "composition",
+          "caption",
+          "template",
+          "customTrack",
+          "customTrack2",
+          "illustration",
+          "custom",
+          "main",
+          "shape",
+          "linealAudioBars",
+          "radialAudioBars",
+          "progressFrame",
+          "progressBar",
+          "rect",
+          "progressSquare"
+        ],
+        "type": "text",
+        "items": [
+          "Ne8mJmTblCUw8HEM9J5VA"
+        ],
+        "magnetic": false,
+        "static": false
+      },
+      {
+        "id": "63GX8IW_9S-aJ4pL2E3mZ",
+        "type": "text",
+        "items": [
+          "140FEfTwzxt_VnGJZ0mXL"
+        ],
+        "static": false,
+        "accepts": [
+          "text",
+          "image",
+          "video",
+          "audio",
+          "composition",
+          "caption",
+          "template",
+          "customTrack",
+          "customTrack2",
+          "illustration",
+          "custom",
+          "main",
+          "shape",
+          "linealAudioBars",
+          "radialAudioBars",
+          "progressFrame",
+          "progressBar",
+          "rect",
+          "progressSquare"
+        ],
+        "magnetic": false
+      }
+    ],
+    "size": {
+      "width": 1080,
+      "height": 1920
+    },
+    "trackItemIds": [
+      "140FEfTwzxt_VnGJZ0mXL",
+      "Ne8mJmTblCUw8HEM9J5VA"
+    ],
+    "transitionsMap": {},
+    "trackItemsMap": {
+      "140FEfTwzxt_VnGJZ0mXL": {
+        "id": "140FEfTwzxt_VnGJZ0mXL",
+        "name": "text",
+        "type": "text",
+        "isMain": false,
+        "details": {
+          "top": "742px",
+          "left": "240px",
+          "text": "Heading and some body",
+          "color": "#ffffff",
+          "skewX": 0,
+          "skewY": 0,
+          "width": 600,
+          "border": "none",
+          "height": 436,
+          "fontUrl": "https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmWUlvAx05IsDqlA.ttf",
+          "opacity": 100,
+          "fontSize": 120,
+          "wordWrap": "break-word",
+          "boxShadow": {
+            "x": 0,
+            "y": 0,
+            "blur": 0,
+            "color": "#ffffff"
+          },
+          "fontStyle": "normal",
+          "textAlign": "center",
+          "transform": "none",
+          "wordBreak": "normal",
+          "fontFamily": "Roboto-Bold",
+          "fontWeight": "normal",
+          "lineHeight": "normal",
+          "textShadow": "none",
+          "borderColor": "#000000",
+          "borderWidth": 0,
+          "wordSpacing": "normal",
+          "letterSpacing": "normal",
+          "textTransform": "none",
+          "textDecoration": "none",
+          "backgroundColor": "transparent",
+          "WebkitTextStrokeColor": "#ffffff",
+          "WebkitTextStrokeWidth": "0px"
+        },
+        "display": {
+          "to": 5000,
+          "from": 0
+        },
+        "metadata": {}
+      },
+      "Ne8mJmTblCUw8HEM9J5VA": {
+        "id": "Ne8mJmTblCUw8HEM9J5VA",
+        "name": "text",
+        "type": "text",
+        "display": {
+          "from": 0,
+          "to": 5000
+        },
+        "details": {
+          "text": "Heading and some body",
+          "fontSize": 120,
+          "width": 600,
+          "fontUrl": "https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmWUlvAx05IsDqlA.ttf",
+          "fontFamily": "Roboto-Bold",
+          "color": "#ffffff",
+          "wordWrap": "break-word",
+          "textAlign": "center",
+          "borderWidth": 0,
+          "borderColor": "#000000",
+          "boxShadow": {
+            "color": "#ffffff",
+            "x": 0,
+            "y": 0,
+            "blur": 0
+          },
+          "fontWeight": "normal",
+          "fontStyle": "normal",
+          "textDecoration": "none",
+          "lineHeight": "normal",
+          "letterSpacing": "normal",
+          "wordSpacing": "normal",
+          "backgroundColor": "transparent",
+          "border": "none",
+          "textShadow": "none",
+          "opacity": 100,
+          "wordBreak": "normal",
+          "WebkitTextStrokeColor": "#ffffff",
+          "WebkitTextStrokeWidth": "0px",
+          "top": "744px",
+          "left": "240px",
+          "textTransform": "none",
+          "transform": "none",
+          "skewX": 0,
+          "skewY": 0,
+          "height": 432
+        },
+        "metadata": {},
+        "isMain": false
+      }
+    },
+    "transitionIds": []
+  },
+  "options": {
+    "fps": 30,
+    "width": 1080,
+    "height": 1920,
+    "format": "mp4",
+    "quality": "high"
+  }
+}

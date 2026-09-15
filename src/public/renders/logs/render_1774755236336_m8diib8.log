@@ -1,0 +1,46 @@
+=== Render Log for render_1774755236336_m8diib8 ===
+Started: 2026-03-29T03:34:00.611Z
+Config: {
+  "concurrency": 8,
+  "verbose": false,
+  "timeoutMs": 180000
+}
+
+[2026-03-29T03:34:00.612Z] Starting job: render_1774755236336_m8diib8
+[2026-03-29T03:34:00.614Z] Options: {"fps":30,"width":1080,"height":1920,"format":"mp4","quality":"high"}
+[2026-03-29T03:34:00.615Z] Concurrency: 8 threads
+[2026-03-29T03:34:00.616Z] Bundling from: C:\Users\PC\Downloads\veditor_vip\remotion\index.tsx
+[2026-03-29T03:34:05.321Z] ERROR: Render failed
+  Message: Module not found: Error: Can't resolve '@/lib/public-env' in 'C:\Users\PC\Downloads\veditor_vip\modules\transitions'
+resolve '@/lib/public-env' in 'C:\Users\PC\Downloads\veditor_vip\modules\transitions'
+  Parsed request is a module
+  using description file: C:\Users\PC\Downloads\veditor_vip\package.json (relative path: ./modules/transitions)
+    Field 'browser' doesn't contain a valid alias configuration
+    resolve as module
+      C:\Users\PC\Downloads\veditor_vip\modules\transitions\node_modules doesn't exist or is not a directory
+      C:\Users\PC\Downloads\veditor_vip\modules\node_modules doesn't exist or is not a directory
+      looking for modules in C:\Users\PC\Downloads\veditor_vip\node_modules
+        C:\Users\PC\Downloads\veditor_vip\node_modules\@\lib doesn't exist
+      C:\Users\PC\Downloads\node_modules doesn't exist or is not a directory
+      C:\Users\PC\node_modules doesn't exist or is not a directory
+      C:\Users\node_modules doesn't exist or is not a directory
+      C:\node_modules doesn't exist or is not a directory
+  Stack: Error: Module not found: Error: Can't resolve '@/lib/public-env' in 'C:\Users\PC\Downloads\veditor_vip\modules\transitions'
+resolve '@/lib/public-env' in 'C:\Users\PC\Downloads\veditor_vip\modules\transitions'
+  Parsed request is a module
+  using description file: C:\Users\PC\Downloads\veditor_vip\package.json (relative path: ./modules/transitions)
+    Field 'browser' doesn't contain a valid alias configuration
+    resolve as module
+      C:\Users\PC\Downloads\veditor_vip\modules\transitions\node_modules doesn't exist or is not a directory
+      C:\Users\PC\Downloads\veditor_vip\modules\node_modules doesn't exist or is not a directory
+      looking for modules in C:\Users\PC\Downloads\veditor_vip\node_modules
+        C:\Users\PC\Downloads\veditor_vip\node_modules\@\lib doesn't exist
+      C:\Users\PC\Downloads\node_modules doesn't exist or is not a directory
+      C:\Users\PC\node_modules doesn't exist or is not a directory
+      C:\Users\node_modules doesn't exist or is not a directory
+      C:\node_modules doesn't exist or is not a directory
+    at runWebpack (C:\Users\PC\Downloads\veditor_vip\node_modules\.pnpm\@remotion+bundler@4.0.441_@_a300ca3dfcb2b21eae66d30b3f940b64\node_modules\@remotion\bundler\dist\bundle.js:226:23)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async internalBundle (C:\Users\PC\Downloads\veditor_vip\node_modules\.pnpm\@remotion+bundler@4.0.441_@_a300ca3dfcb2b21eae66d30b3f940b64\node_modules\@remotion\bundler\dist\bundle.js:230:13)
+    at async bundle (C:\Users\PC\Downloads\veditor_vip\node_modules\.pnpm\@remotion+bundler@4.0.441_@_a300ca3dfcb2b21eae66d30b3f940b64\node_modules\@remotion\bundler\dist\bundle.js:330:20)
+    at async main (C:\Users\PC\Downloads\veditor_vip\scripts\render-video.ts:122:28)

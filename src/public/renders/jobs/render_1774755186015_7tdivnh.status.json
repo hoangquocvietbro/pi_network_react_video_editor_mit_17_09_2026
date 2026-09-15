@@ -1,0 +1,5 @@
+{
+  "status": "failed",
+  "progress": 0,
+  "error": "Module not found: Error: Can't resolve '@/lib/public-env' in 'C:\\Users\\PC\\Downloads\\veditor_vip\\modules\\transitions'\nresolve '@/lib/public-env' in 'C:\\Users\\PC\\Downloads\\veditor_vip\\modules\\transitions'\n  Parsed request is a module\n  using description file: C:\\Users\\PC\\Downloads\\veditor_vip\\package.json (relative path: ./modules/transitions)\n    Field 'browser' doesn't contain a valid alias configuration\n    resolve as module\n      C:\\Users\\PC\\Downloads\\veditor_vip\\modules\\transitions\\node_modules doesn't exist or is not a directory\n      C:\\Users\\PC\\Downloads\\veditor_vip\\modules\\node_modules doesn't exist or is not a directory\n      looking for modules in C:\\Users\\PC\\Downloads\\veditor_vip\\node_modules\n        C:\\Users\\PC\\Downloads\\veditor_vip\\node_modules\\@\\lib doesn't exist\n      C:\\Users\\PC\\Downloads\\node_modules doesn't exist or is not a directory\n      C:\\Users\\PC\\node_modules doesn't exist or is not a directory\n      C:\\Users\\node_modules doesn't exist or is not a directory\n      C:\\node_modules doesn't exist or is not a directory"
+}
