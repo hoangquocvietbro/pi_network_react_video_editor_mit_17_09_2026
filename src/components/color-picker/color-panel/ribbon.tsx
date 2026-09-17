@@ -196,12 +196,12 @@ const Ribbon: FC<TPropsComp> = ({ color, onChange, setChange }) => {
 			<Background />
 			<Pointer left={per} backgroundColor={hueColor} />
 			<div
-				css={css`
-          position: absolute;
-          height: 100%;
-          width: 100%;
-          cursor: grab;
-        `}
+				style={{
+					position: "absolute",
+					height: "100%",
+					width: "100%",
+					cursor: "grab",
+				}}
 			/>
 		</Container>
 	);

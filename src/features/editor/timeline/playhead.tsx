@@ -24,9 +24,15 @@ const Playhead = ({ scrollLeft }: { scrollLeft: number }) => {
 			| MouseEvent<HTMLDivElement, globalThis.MouseEvent>
 			| TouchEvent<HTMLDivElement>,
 	) => {
-		e.preventDefault(); // Prevent default drag behavior
+		// Only prevent default on mouse events. Touch behavior is controlled via CSS touch-action: none
+		if (!("touches" in e) && e.cancelable) {
+			e.preventDefault();
+		}
 		setIsDragging(true);
-		const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+		const clientX =
+			"touches" in e
+				? e.touches[0]?.clientX ?? e.changedTouches?.[0]?.clientX ?? 0
+				: e.clientX;
 		setDragStartX(clientX);
 		setDragStartPosition(position);
 	};
@@ -35,25 +41,36 @@ const Playhead = ({ scrollLeft }: { scrollLeft: number }) => {
 		e: globalThis.MouseEvent | globalThis.TouchEvent,
 	) => {
 		if (isDragging) {
-			e.preventDefault(); // Prevent default drag behavior
-			const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+			if (!("touches" in e) && e.cancelable) {
+				e.preventDefault();
+			}
+			const clientX =
+				"touches" in e
+					? e.touches[0]?.clientX ?? e.changedTouches?.[0]?.clientX ?? 0
+					: e.clientX;
 			const delta = clientX - dragStartX + scrollLeft;
 			const newPosition = dragStartPosition + delta;
 
 			const time = unitsToTimeMs(newPosition, scale.zoom);
-			playerRef?.current?.seekTo((time * fps) / 1000);
+			if (Number.isFinite(time)) {
+				playerRef?.current?.seekTo(Math.max(0, (time * fps) / 1000));
+			}
 		}
 	};
 
 	useEffect(() => {
 		const preventDefaultDrag = (e: Event) => {
-			e.preventDefault();
+			if (e.cancelable) {
+				e.preventDefault();
+			}
 		};
 
 		if (isDragging) {
 			document.addEventListener("mousemove", handleMouseMove);
 			document.addEventListener("mouseup", handleMouseUp);
-			document.addEventListener("touchmove", handleMouseMove);
+			document.addEventListener("touchmove", handleMouseMove, {
+				passive: false,
+			});
 			document.addEventListener("touchend", handleMouseUp);
 			document.addEventListener("dragstart", preventDefaultDrag);
 		} else {

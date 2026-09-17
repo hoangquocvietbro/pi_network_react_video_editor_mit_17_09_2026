@@ -29,6 +29,9 @@ import { useIsLargeScreen } from "@/hooks/use-media-query";
 import { ITrackItem } from "@designcombo/types";
 import useLayoutStore from "./store/use-layout-store";
 import ControlItemHorizontal from "./control-item-horizontal";
+import { AuthProvider } from "../../components/auth/auth-provider";
+import { useProjectStore } from "../../store/use-project-store";
+import { ProjectLoadDialog } from "../../components/project-management/project-load-dialog";
 
 const stateManager = new StateManager({
 	size: {
@@ -36,6 +39,29 @@ const stateManager = new StateManager({
 		height: 1920,
 	},
 });
+
+const initPlayload = {
+	size: {
+		width: 1080,
+		height: 1920,
+	},
+	mediaFiles: [],
+	backgroundColor: "#000000",
+	trackItems: [],
+	transitions: [],
+	aspectRatio: 16 / 9,
+	backgroundVideos: [],
+	bgm: {
+		id: 0,
+		name: "",
+		duration: 0,
+		url: "",
+		volume: 1,
+	},
+	name: "Untitled Video",
+	createdAt: new Date().toISOString(),
+	updatedAt: new Date().toISOString(),
+};
 
 const Editor = ({ tempId, id }: { tempId?: string; id?: string }) => {
 	const [projectName, setProjectName] = useState<string>("Untitled video");
@@ -46,6 +72,7 @@ const Editor = ({ tempId, id }: { tempId?: string; id?: string }) => {
 	const { activeIds, trackItemsMap, transitionsMap } = useStore();
 	const [loaded, setLoaded] = useState(false);
 	const [trackItem, setTrackItem] = useState<ITrackItem | null>(null);
+	const [isLoadDialogOpen, setIsLoadDialogOpen] = useState(false);
 	const {
 		setTrackItem: setLayoutTrackItem,
 		setFloatingControl,
@@ -54,72 +81,54 @@ const Editor = ({ tempId, id }: { tempId?: string; id?: string }) => {
 	} = useLayoutStore();
 	const isLargeScreen = useIsLargeScreen();
 
+	// Project management
+	const {
+		currentProject,
+		projectName: storeProjectName,
+		loadProject,
+		setProjectName: setStoreProjectName,
+		clearCurrentProject
+	} = useProjectStore();
 	useTimelineEvents();
 
 	const { setCompactFonts, setFonts } = useDataState();
-
+	// Load project if ID is provided
 	useEffect(() => {
-		if (tempId) {
-			const fetchVideoJson = async () => {
-				try {
-					const response = await fetch(
-						`https://scheme.combo.sh/video-json/${id}`,
-					);
-					if (!response.ok) {
-						throw new Error(`HTTP error! status: ${response.status}`);
-					}
-					const data = await response.json();
-
-					const payload = data.videoJson.json;
-					if (payload) {
-						dispatch(DESIGN_LOAD, { payload });
-					}
-				} catch (error) {
-					console.error("Error fetching video JSON:", error);
-				}
-			};
-			fetchVideoJson();
+		if (id && id !== 'new') {
+			loadProjectFromId(id);
+		} else {
+			// Load default initPlayload data for new projects
+			dispatch(DESIGN_LOAD, { payload: initPlayload });
 		}
+	}, [id]);
 
-		if (id) {
-			const fetchSceneById = async () => {
-				try {
-					const response = await fetch(`/api/scene/${id}`);
-					if (!response.ok) {
-						throw new Error(`HTTP error! status: ${response.status}`);
-					}
-					const data = await response.json();
-					console.log("Fetched scene data:", data);
-
-					if (data.success && data.scene) {
-						// Set project name if available
-						if (data.project?.name) {
-							setProjectName(data.project.name);
-						}
-
-						// Load the scene content into the editor
-						if (data.scene.content) {
-							dispatch(DESIGN_LOAD, { payload: data.scene.content });
-						}
-					} else {
-						console.error("Failed to fetch scene:", data.error);
-					}
-				} catch (error) {
-					console.error("Error fetching scene by ID:", error);
-				}
-			};
-			fetchSceneById();
+	// Load project from ID
+	const loadProjectFromId = async (projectId: string) => {
+		try {
+			await loadProject(projectId);
+			// The project data will be loaded via the store effect
+		} catch (error) {
+			console.error('Failed to load project:', error);
+			// Fallback to initPlayload data
+			dispatch(DESIGN_LOAD, { payload: initPlayload });
 		}
-	}, [id, tempId]);
+	};
 
+	// Load project design data when current project changes
 	useEffect(() => {
-		console.log("scene", scene);
-		console.log("timeline", timeline);
-		if (scene && timeline) {
-			console.log("scene", scene);
-			dispatch(DESIGN_LOAD, { payload: scene });
+		if (currentProject && currentProject.design_data) {
+			dispatch(DESIGN_LOAD, { payload: currentProject.design_data });
+			setProjectName(currentProject.name);
 		}
-	}, [scene, timeline]);
+	}, [currentProject]);
+
+	// Sync project name with store
+	useEffect(() => {
+		if (storeProjectName && storeProjectName !== projectName) {
+			setProjectName(storeProjectName);
+		}
+	}, [storeProjectName]);
+
 
 	useEffect(() => {
 		setCompactFonts(getCompactFontData(FONTS));
@@ -146,10 +155,17 @@ const Editor = ({ tempId, id }: { tempId?: string; id?: string }) => {
 		const timelineContainer = document.getElementById("timeline-container");
 		if (!timelineContainer) return;
 
+		const isSmall = window.innerWidth < 768;
+		const container =
+			timelineContainer.querySelector<HTMLElement>(".relative.flex-1");
+		const width =
+			container?.clientWidth ||
+			(timelineContainer.clientWidth - (isSmall ? 0 : 40));
+
 		timeline?.resize(
 			{
 				height: timelineContainer.clientHeight - 90,
-				width: timelineContainer.clientWidth - 40,
+				width,
 			},
 			{
 				force: true,
@@ -192,13 +208,24 @@ const Editor = ({ tempId, id }: { tempId?: string; id?: string }) => {
 		setLoaded(true);
 	}, []);
 
+	// Handle project loading
+	const handleProjectLoad = (projectId: string) => {
+		// Update URL to reflect loaded project
+		window.history.pushState({}, '', `/edit/${projectId}`);
+	};
+
+	// Handle project name change
+	const handleProjectNameChange = (name: string) => {
+		setProjectName(name);
+		setStoreProjectName(name);
+	};
 	return (
 		<div className="flex h-screen w-screen flex-col">
 			<Navbar
 				projectName={projectName}
 				user={null}
 				stateManager={stateManager}
-				setProjectName={setProjectName}
+				setProjectName={handleProjectNameChange}
 			/>
 			<div className="flex flex-1">
 				{isLargeScreen && (
@@ -241,6 +268,13 @@ const Editor = ({ tempId, id }: { tempId?: string; id?: string }) => {
 				</ResizablePanelGroup>
 				<ControlItem />
 			</div>
+
+			{/* Project Load Dialog */}
+			<ProjectLoadDialog
+				open={isLoadDialogOpen}
+				onOpenChange={setIsLoadDialogOpen}
+				onProjectLoad={handleProjectLoad}
+			/>
 		</div>
 	);
 };

@@ -3,13 +3,11 @@ export const getTargetControls = (targetType: string): string[] => {
 		case "text":
 			return ["e", "se"];
 		case "image":
-			return ["nw", "ne", "sw", "se"];
+		case "video":
 		case "svg":
-			return ["nw", "n", "ne", "w", "e", "sw", "s", "se"];
 		case "group":
-			return ["nw", "ne", "sw", "se"];
 		default:
-			return ["nw", "ne", "sw", "se"];
+			return ["nw", "n", "ne", "w", "e", "sw", "s", "se"];
 	}
 };
 
@@ -34,11 +32,12 @@ export const getTargetAbles = (targetType: string): ITargetAbles => {
 				snappable: true,
 			};
 		case "image":
+		case "video":
 			return {
 				rotatable: true,
 				resizable: false,
 				scalable: true,
-				keepRatio: true,
+				keepRatio: false,
 				draggable: true,
 				snappable: true,
 			};
@@ -47,7 +46,7 @@ export const getTargetAbles = (targetType: string): ITargetAbles => {
 				rotatable: false,
 				resizable: false,
 				scalable: true,
-				keepRatio: true,
+				keepRatio: false,
 				draggable: true,
 				snappable: true,
 			};
@@ -56,7 +55,7 @@ export const getTargetAbles = (targetType: string): ITargetAbles => {
 				rotatable: true,
 				resizable: false,
 				scalable: true,
-				keepRatio: true,
+				keepRatio: false,
 
 				draggable: true,
 				snappable: true,
@@ -66,7 +65,7 @@ export const getTargetAbles = (targetType: string): ITargetAbles => {
 				rotatable: true,
 				resizable: false,
 				scalable: true,
-				keepRatio: true,
+				keepRatio: false,
 				draggable: true,
 				snappable: true,
 			};

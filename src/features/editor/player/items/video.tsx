@@ -11,7 +11,7 @@ export const Video = ({
 	options: SequenceItemOptions;
 }) => {
 	const { fps } = options;
-	const { details, animations } = item;
+	const { details } = item;
 	const playbackRate = item.playbackRate || 1;
 	const crop = details?.crop || {
 		x: 0,
@@ -27,7 +27,13 @@ export const Video = ({
 				endAt={(item.trim?.to! / 1000) * fps || 1 / fps}
 				playbackRate={playbackRate}
 				src={details.src}
-				volume={details.volume || 0 / 100}
+				volume={(details.volume ?? 100) / 100}
+				style={{
+					width: "100%",
+					height: "100%",
+					objectFit: "fill",
+					pointerEvents: "none",
+				}}
 			/>
 		</div>
 	);

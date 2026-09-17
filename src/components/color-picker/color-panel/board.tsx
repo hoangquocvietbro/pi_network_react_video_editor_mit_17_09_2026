@@ -208,16 +208,13 @@ const Board: FC<TPropsComp> = ({ color, onChange, setChange }) => {
 	return (
 		<Container ref={node}>
 			<div
-				css={css`
-          width: 100%;
-          height: 120px;
-          position: relative;
-          z-index: 1;
-          background-color: ${hueColor};
-        `}
 				style={{
-					height: `${154}px`,
-					minHeight: `${154}px`,
+					width: "100%",
+					position: "relative",
+					zIndex: 1,
+					backgroundColor: hueColor,
+					height: "154px",
+					minHeight: "154px",
 				}}
 			>
 				<ValueLayer />

@@ -1,3 +1,4 @@
+import { PUBLIC_ENV } from "@/lib/public-env";
 import type { Metadata } from "next/types";
 
 export function createMetadata(override: Metadata): Metadata {
@@ -8,7 +9,7 @@ export function createMetadata(override: Metadata): Metadata {
 			description: override.description ?? undefined,
 			url: "https://designcombo.dev",
 			images: "/banner.png",
-			siteName: "Combo",
+			siteName: "VEditor",
 			...override.openGraph,
 		},
 		twitter: {
@@ -20,12 +21,12 @@ export function createMetadata(override: Metadata): Metadata {
 			...override.twitter,
 		},
 		icons: {
-			icon: "/icon.svg",
+			icon: "/logo.svg"
 		},
 	};
 }
 
 export const baseUrl =
-	process.env.NODE_ENV === "development"
+	PUBLIC_ENV.NODE_ENV === "development"
 		? new URL("http://localhost:3000")
 		: new URL("https://designcombo.dev");

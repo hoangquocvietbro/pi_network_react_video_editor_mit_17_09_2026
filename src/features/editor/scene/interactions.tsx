@@ -21,11 +21,14 @@ interface SceneInteractionsProps {
 	containerRef: React.RefObject<HTMLDivElement>;
 	zoom: number;
 	size: { width: number; height: number };
+	isPinching?: boolean;
 }
 export function SceneInteractions({
 	stateManager,
 	containerRef,
 	zoom,
+	size,
+	isPinching
 }: SceneInteractionsProps) {
 	const [targets, setTargets] = useState<HTMLDivElement[]>([]);
 	const [selection, setSelection] = useState<Selection>();
@@ -81,6 +84,12 @@ export function SceneInteractions({
 			selectFromInside: false,
 			selectByClick: true,
 			toggleContinueSelect: "shift",
+			dragCondition: (e: any) => {
+				if (e.inputEvent?.touches && e.inputEvent.touches.length > 1) {
+					return false;
+				}
+				return true;
+			}
 		})
 			.on("select", (e) => {
 				// Filter out audio items from selection
@@ -172,8 +181,12 @@ export function SceneInteractions({
 	}, []);
 
 	useEffect(() => {
-		moveableRef.current?.moveable.updateRect();
-	}, [trackItemsMap]);
+		const handle = requestAnimationFrame(() => {
+			moveableRef.current?.moveable.updateRect();
+		});
+		return () => cancelAnimationFrame(handle);
+	}, [trackItemsMap, targets, zoom, size]);
+
 
 	useEffect(() => {
 		setSceneMoveableRef(moveableRef as React.RefObject<Moveable>);
@@ -185,9 +198,9 @@ export function SceneInteractions({
 			renderDirections={selectionInfo.controls}
 			{...selectionInfo.ables}
 			origin={false}
-			target={targets}
+			target={isPinching ? [] : targets}
 			zoom={1 / zoom}
-			className="designcombo-scene-moveable"
+			className={`designcombo-scene-moveable ${isPinching ? "pointer-events-none" : ""}`}
 			onDrag={({ target, top, left }) => {
 				target.style.top = `${top}px`;
 				target.style.left = `${left}px`;
@@ -214,35 +227,48 @@ export function SceneInteractions({
 				const moveY = yControl === -1;
 
 				const scaleRegex = /scale\(([^)]+)\)/;
-				const match = target.style.transform.match(scaleRegex);
-				if (!match) return;
+				const match = target.style.transform ? target.style.transform.match(scaleRegex) : null;
 
-				//get current scale
-				const [scaleX, scaleY] = match[1]
-					.split(",")
-					.map((value) => Number.parseFloat(value.trim()));
+				//get current scale safely (handles scale(s) and scale(sx, sy), default 1)
+				let scaleX = 1;
+				let scaleY = 1;
+				if (match) {
+					const parts1 = match[1].split(",");
+					const rawScaleX = Number.parseFloat(parts1[0].trim());
+					scaleX = isNaN(rawScaleX) ? 1 : rawScaleX;
+					const rawScaleY = parts1[1] ? Number.parseFloat(parts1[1].trim()) : scaleX;
+					scaleY = isNaN(rawScaleY) ? scaleX : rawScaleY;
+				}
 
-				//get new Scale
+				//get new Scale safely
 				const match2 = transform.match(scaleRegex);
-				if (!match2) return;
-				const [newScaleX, newScaleY] = match2[1]
-					.split(",")
-					.map((value) => Number.parseFloat(value.trim()));
+				let newScaleX = scaleX;
+				let newScaleY = scaleY;
+				if (match2) {
+					const parts2 = match2[1].split(",");
+					const rawNewScaleX = Number.parseFloat(parts2[0].trim());
+					newScaleX = isNaN(rawNewScaleX) ? scaleX : rawNewScaleX;
+					const rawNewScaleY = parts2[1] ? Number.parseFloat(parts2[1].trim()) : newScaleX;
+					newScaleY = isNaN(rawNewScaleY) ? newScaleX : rawNewScaleY;
+				}
 
-				const currentWidth = target.clientWidth * scaleX;
-				const currentHeight = target.clientHeight * scaleY;
+				const htmlTarget = target as HTMLElement;
+				const baseWidth = htmlTarget.clientWidth || htmlTarget.offsetWidth || parseFloat(htmlTarget.style?.width) || 100;
+				const baseHeight = htmlTarget.clientHeight || htmlTarget.offsetHeight || parseFloat(htmlTarget.style?.height) || 100;
 
-				const newWidth = target.clientWidth * newScaleX;
-				const newHeight = target.clientHeight * newScaleY;
+				const currentWidth = baseWidth * scaleX;
+				const currentHeight = baseHeight * scaleY;
 
+				const newWidth = baseWidth * newScaleX;
+				const newHeight = baseHeight * newScaleY;
 				target.style.transform = transform;
 
 				//Move element to initial Left position
 				const diffX = currentWidth - newWidth;
-				let newLeft = Number.parseFloat(target.style.left) - diffX / 2;
+				let newLeft = Number.parseFloat(target.style.left || "0") - diffX / 2;
 
 				const diffY = currentHeight - newHeight;
-				let newTop = Number.parseFloat(target.style.top) - diffY / 2;
+				let newTop = Number.parseFloat(target.style.top || "0") - diffY / 2;
 
 				if (moveX) {
 					newLeft += diffX;

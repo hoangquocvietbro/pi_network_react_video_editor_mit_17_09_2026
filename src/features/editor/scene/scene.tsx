@@ -7,7 +7,7 @@ import Board from "./board";
 import useZoom from "../hooks/use-zoom";
 import { SceneInteractions } from "./interactions";
 import { SceneRef } from "./scene.types";
-
+import CanvasControls from "./canvas-controls";
 const Scene = forwardRef<
 	SceneRef,
 	{
@@ -16,10 +16,15 @@ const Scene = forwardRef<
 >(({ stateManager }, ref) => {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const { size, trackItemIds } = useStore();
-	const { zoom, handlePinch, recalculateZoom } = useZoom(
-		containerRef as React.RefObject<HTMLDivElement>,
-		size,
-	);
+	const {
+		zoom,
+		zoomPercent,
+		zoomMode,
+		isPinching,
+		setPresetZoom,
+		recalculateZoom
+	} = useZoom(containerRef as React.RefObject<HTMLDivElement>, size);
+
 
 	// Expose the recalculateZoom function to parent
 	useImperativeHandle(ref, () => ({
@@ -41,16 +46,19 @@ const Scene = forwardRef<
 			}}
 			ref={containerRef}
 		>
-			{trackItemIds.length === 0 && <SceneEmpty />}
+			{trackItemIds.length === 0 && <SceneEmpty zoom={zoom} size={size} />}
 			<div
 				style={{
 					width: size.width,
 					height: size.height,
 					background: "#000000",
-					transform: `scale(${zoom})`,
 					position: "absolute",
+					left: "50%",
+					top: "50%",
+					transform: `translate(-50%, -50%) scale(${zoom})`,
+					transformOrigin: "center center"
 				}}
-				className="player-container bg-sidebar"
+				className="player-container bg-sidebar shadow-2xl"
 			>
 				<div
 					style={{
@@ -70,9 +78,17 @@ const Scene = forwardRef<
 						containerRef={containerRef as React.RefObject<HTMLDivElement>}
 						zoom={zoom}
 						size={size}
+						isPinching={isPinching}
 					/>
 				</Board>
 			</div>
+
+			<CanvasControls
+				zoomPercent={zoomPercent}
+				zoomMode={zoomMode}
+				onSelectZoom={setPresetZoom}
+				containerRef={containerRef}
+			/>
 		</div>
 	);
 });

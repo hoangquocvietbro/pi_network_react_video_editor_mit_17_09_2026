@@ -107,83 +107,90 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
 	useEffect(() => {
 		const canvasEl = canvasElRef.current;
 		const timelineContainerEl = timelineContainerRef.current;
+		const container = containerRef.current; // Use the actual parent of the canvas
+		if (!canvasEl || !timelineContainerEl || !container) return;
 
-		if (!canvasEl || !timelineContainerEl) return;
+		// Sử dụng setTimeout để đảm bảo trình duyệt đã render xong layout
+		const timer = setTimeout(() => {
+			// Get the actual width of the flex-1 container dynamically
+			const containerWidth =
+				container.clientWidth ||
+				timelineContainerEl.clientWidth - timelineOffsetX;
+			const containerHeight = timelineContainerEl.clientHeight - 90;
+			const canvas = new CanvasTimeline(canvasEl, {
+				width: containerWidth,
+				height: containerHeight,
+				bounding: {
+					width: containerWidth,
+					height: 0,
+				},
+				selectionColor: "rgba(0, 216, 214,0.1)",
+				selectionBorderColor: "rgba(0, 216, 214,1.0)",
+				onScroll,
+				onResizeCanvas,
+				scale: scale,
+				state: stateManager,
+				duration,
+				spacing: {
+					left: TIMELINE_OFFSET_CANVAS_LEFT,
+					right: TIMELINE_OFFSET_CANVAS_RIGHT,
+				},
+				sizesMap: {
+					text: 32,
+					audio: 36,
+					customTrack: 40,
+					customTrack2: 40,
+					linealAudioBars: 40,
+					radialAudioBars: 40,
+					waveAudioBars: 40,
+					hillAudioBars: 40,
+				},
+				itemTypes: [
+					"text",
+					"image",
+					"audio",
+					"video",
+					"helper",
+					"track",
+					"composition",
+					"template",
+					"linealAudioBars",
+					"radialAudioBars",
+					"progressFrame",
+					"progressBar",
+					"waveAudioBars",
+					"hillAudioBars",
+				],
+				acceptsMap: {
+					text: ["text"],
+					image: ["image", "video"],
+					video: ["video", "image"],
+					audio: ["audio"],
+					template: ["template"],
+					customTrack: ["video", "image"],
+					customTrack2: ["video", "image"],
+					main: ["video", "image"],
+					linealAudioBars: ["audio", "linealAudioBars"],
+					radialAudioBars: ["audio", "radialAudioBars"],
+					waveAudioBars: ["audio", "waveAudioBars"],
+					hillAudioBars: ["audio", "hillAudioBars"],
+				},
+				guideLineColor: "#ffffff",
+			});
 
-		const containerWidth = timelineContainerEl.clientWidth - 40;
-		const containerHeight = timelineContainerEl.clientHeight - 90;
-		const canvas = new CanvasTimeline(canvasEl, {
-			width: containerWidth,
-			height: containerHeight,
-			bounding: {
+			canvasRef.current = canvas;
+
+			setCanvasSize({ width: containerWidth, height: containerHeight });
+			setSize({
 				width: containerWidth,
 				height: 0,
-			},
-			selectionColor: "rgba(0, 216, 214,0.1)",
-			selectionBorderColor: "rgba(0, 216, 214,1.0)",
-			onScroll,
-			onResizeCanvas,
-			scale: scale,
-			state: stateManager,
-			duration,
-			spacing: {
-				left: TIMELINE_OFFSET_CANVAS_LEFT,
-				right: TIMELINE_OFFSET_CANVAS_RIGHT,
-			},
-			sizesMap: {
-				text: 32,
-				audio: 36,
-				customTrack: 40,
-				customTrack2: 40,
-				linealAudioBars: 40,
-				radialAudioBars: 40,
-				waveAudioBars: 40,
-				hillAudioBars: 40,
-			},
-			itemTypes: [
-				"text",
-				"image",
-				"audio",
-				"video",
-				"helper",
-				"track",
-				"composition",
-				"template",
-				"linealAudioBars",
-				"radialAudioBars",
-				"progressFrame",
-				"progressBar",
-				"waveAudioBars",
-				"hillAudioBars",
-			],
-			acceptsMap: {
-				text: ["text"],
-				image: ["image", "video"],
-				video: ["video", "image"],
-				audio: ["audio"],
-				template: ["template"],
-				customTrack: ["video", "image"],
-				customTrack2: ["video", "image"],
-				main: ["video", "image"],
-				linealAudioBars: ["audio", "linealAudioBars"],
-				radialAudioBars: ["audio", "radialAudioBars"],
-				waveAudioBars: ["audio", "waveAudioBars"],
-				hillAudioBars: ["audio", "hillAudioBars"],
-			},
-			guideLineColor: "#ffffff",
-		});
-
-		canvasRef.current = canvas;
-
-		setCanvasSize({ width: containerWidth, height: containerHeight });
-		setSize({
-			width: containerWidth,
-			height: 0,
-		});
-		setTimeline(canvas);
+			});
+			setTimeline(canvas);
+		}, 100)
 
 		return () => {
-			canvas.purge();
+			clearTimeout(timer);
+			if (canvasRef.current) canvasRef.current.purge();
 		};
 	}, []);
 
@@ -223,6 +230,17 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
 					});
 				}
 			}
+			if (obj.key === `${TIMELINE_PREFIX}:scroll:to`) {
+				const targetScrollLeft = obj.value?.payload?.scrollLeft ?? 0;
+				const canvas = canvasRef.current;
+				if (canvas) {
+					canvas.scrollTo({ scrollLeft: targetScrollLeft });
+				}
+				if (horizontalScrollbarVpRef.current) {
+					horizontalScrollbarVpRef.current.scrollLeft = targetScrollLeft;
+				}
+				setScrollLeft(targetScrollLeft);
+			}
 		});
 		return () => {
 			subscription.unsubscribe();
@@ -248,7 +266,9 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
 		if (!canvas) return;
 
 		const time = unitsToTimeMs(units, scale.zoom);
-		playerRef?.current?.seekTo((time * fps) / 1000);
+		if (Number.isFinite(time)) {
+			playerRef?.current?.seekTo(Math.max(0, (time * fps) / 1000));
+		}
 	};
 
 	const onRulerScroll = (newScrollLeft: number) => {
@@ -290,12 +310,14 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
 			/>
 			<Playhead scrollLeft={scrollLeft} />
 			<div className="flex">
-				<div
-					style={{
-						width: timelineOffsetX,
-					}}
-					className="relative flex-none"
-				/>
+				{timelineOffsetX > 0 && (
+					<div
+						style={{
+							width: timelineOffsetX,
+						}}
+						className="relative flex-none"
+					/>
+				)}
 				<div style={{ height: canvasSize.height }} className="relative flex-1">
 					<div
 						style={{ height: canvasSize.height }}
@@ -308,7 +330,7 @@ const Timeline = ({ stateManager }: { stateManager: StateManager }) => {
 						type="always"
 						style={{
 							position: "absolute",
-							width: "calc(100vw - 40px)",
+							width: "100%",
 							height: "10px",
 						}}
 						className="ScrollAreaRootH"

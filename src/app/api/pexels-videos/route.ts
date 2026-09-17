@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
+import { SERVER_ENV } from "../../../lib/server-env";
 const PEXELS_API_BASE_URL = "https://api.pexels.com/videos";
 
 interface PexelsVideo {
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
 	const page = searchParams.get("page") || "1";
 	const perPage = searchParams.get("per_page") || "15"; // Fewer videos per page due to larger file sizes
 
-	const apiKey = process.env.PEXELS_API_KEY;
+	const apiKey = SERVER_ENV.PEXELS_API_KEY;
 
 	if (!apiKey) {
 		return NextResponse.json(

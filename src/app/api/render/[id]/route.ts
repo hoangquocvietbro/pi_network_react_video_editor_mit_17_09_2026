@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { SERVER_ENV } from "../../../../lib/server-env";
 export async function GET(
 	request: Request,
 	{ params }: { params: Promise<{ id: string }> },
@@ -14,7 +15,7 @@ export async function GET(
 
 		const response = await fetch(`https://api.combo.sh/v1/render/${id}`, {
 			headers: {
-				Authorization: "Bearer cb_bYQbTtE7Yb7R", // JWT Token from environment
+				Authorization: `Bearer ${SERVER_ENV.COMBO_SK}` // JWT Token from environment
 			},
 			cache: "no-store",
 		});

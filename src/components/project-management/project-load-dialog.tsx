@@ -173,8 +173,8 @@ function ProjectItem({ project, isSelected, onSelect }: ProjectItemProps) {
   return (
     <div
       className={`p-4 border rounded-lg cursor-pointer transition-colors ${isSelected
-          ? 'border-primary bg-primary/5'
-          : 'border-border hover:bg-muted/50'
+        ? 'border-primary bg-primary/5'
+        : 'border-border hover:bg-muted/50'
         }`}
       onClick={() => onSelect(project.id)}
     >

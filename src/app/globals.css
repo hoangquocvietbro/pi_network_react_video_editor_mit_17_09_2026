@@ -134,16 +134,11 @@
 	--spacing: 0.25rem;
 	--shadow-2xs: 0px 1px 3px 0px hsl(0 0% 0% / 0.09);
 	--shadow-xs: 0px 1px 3px 0px hsl(0 0% 0% / 0.09);
-	--shadow-sm: 0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 1px 2px -1px
-		hsl(0 0% 0% / 0.17);
-	--shadow: 0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 1px 2px -1px
-		hsl(0 0% 0% / 0.17);
-	--shadow-md: 0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 2px 4px -1px
-		hsl(0 0% 0% / 0.17);
-	--shadow-lg: 0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 4px 6px -1px
-		hsl(0 0% 0% / 0.17);
-	--shadow-xl: 0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 8px 10px -1px
-		hsl(0 0% 0% / 0.17);
+	--shadow-sm: 0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 1px 2px -1px hsl(0 0% 0% / 0.17);
+	--shadow: 0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 1px 2px -1px hsl(0 0% 0% / 0.17);
+	--shadow-md: 0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 2px 4px -1px hsl(0 0% 0% / 0.17);
+	--shadow-lg: 0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 4px 6px -1px hsl(0 0% 0% / 0.17);
+	--shadow-xl: 0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 8px 10px -1px hsl(0 0% 0% / 0.17);
 	--shadow-2xl: 0px 1px 3px 0px hsl(0 0% 0% / 0.43);
 	--tracking-normal: 0.025em;
 }
@@ -195,16 +190,11 @@
 	--spacing: 0.25rem;
 	--shadow-2xs: 0px 1px 3px 0px hsl(0 0% 0% / 0.09);
 	--shadow-xs: 0px 1px 3px 0px hsl(0 0% 0% / 0.09);
-	--shadow-sm: 0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 1px 2px -1px
-		hsl(0 0% 0% / 0.17);
-	--shadow: 0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 1px 2px -1px
-		hsl(0 0% 0% / 0.17);
-	--shadow-md: 0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 2px 4px -1px
-		hsl(0 0% 0% / 0.17);
-	--shadow-lg: 0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 4px 6px -1px
-		hsl(0 0% 0% / 0.17);
-	--shadow-xl: 0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 8px 10px -1px
-		hsl(0 0% 0% / 0.17);
+	--shadow-sm: 0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 1px 2px -1px hsl(0 0% 0% / 0.17);
+	--shadow: 0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 1px 2px -1px hsl(0 0% 0% / 0.17);
+	--shadow-md: 0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 2px 4px -1px hsl(0 0% 0% / 0.17);
+	--shadow-lg: 0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 4px 6px -1px hsl(0 0% 0% / 0.17);
+	--shadow-xl: 0px 1px 3px 0px hsl(0 0% 0% / 0.17), 0px 8px 10px -1px hsl(0 0% 0% / 0.17);
 	--shadow-2xl: 0px 1px 3px 0px hsl(0 0% 0% / 0.43);
 }
 
@@ -212,6 +202,7 @@
 	* {
 		@apply border-border outline-ring/50;
 	}
+
 	body {
 		@apply bg-background text-foreground;
 		letter-spacing: var(--tracking-normal);
@@ -236,6 +227,7 @@
 		column-gap: 1.5em;
 		column-count: 1;
 	}
+
 	.masonry-sm {
 		gap: 0.5rem;
 		column-width: 160px;
@@ -354,9 +346,11 @@ input[type="number"]::-webkit-outer-spin-button {
 .ScrollAreaScrollbar:hover {
 	background: var(--zinc-800);
 }
+
 .ScrollAreaScrollbar[data-orientation="vertical"] {
 	width: 10px;
 }
+
 .ScrollAreaScrollbar[data-orientation="horizontal"] {
 	flex-direction: column;
 	height: 10px;
@@ -368,6 +362,7 @@ input[type="number"]::-webkit-outer-spin-button {
 	border-radius: 10px;
 	position: relative;
 }
+
 /* increase target size for touch devices https://www.w3.org/WAI/WCAG21/Understanding/target-size.html */
 .ScrollAreaThumb::before {
 	content: "";
@@ -386,6 +381,9 @@ input[type="number"]::-webkit-outer-spin-button {
 .crop {
 	position: relative;
 	font-size: 0;
+	max-width: 100%;
+	max-height: 100%;
+	display: inline-block;
 }
 
 .options {
@@ -396,13 +394,19 @@ input[type="number"]::-webkit-outer-spin-button {
 	/* box-shadow: 0 0 20px 5px rgba(0, 0, 0, 0.3);
 	overflow: hidden;
 	width: 100%; */
+	max-width: 100%;
+	height: auto;
+	display: block;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+	border-radius: 4px;
 }
 
 .box {
-	border: 1px solid white;
+	border: 1.5px solid white;
 	position: absolute;
 	inset: 0;
 	touch-action: none;
+	box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
 }
 
 .box svg {
@@ -411,11 +415,11 @@ input[type="number"]::-webkit-outer-spin-button {
 	width: 100%;
 	height: 100%;
 	cursor: move;
-	touch-action: manipulation;
+	touch-action: none;
 }
 
 .box svg line {
-	stroke: white;
+	stroke: rgba(255, 255, 255, 0.7);
 	stroke-width: 1px;
 }
 
@@ -426,17 +430,19 @@ input[type="number"]::-webkit-outer-spin-button {
 	z-index: 9999;
 	color: white;
 	font-size: 0.9rem;
-	background: rgba(0, 0, 0, 0.3);
-	padding: 0.25rem;
+	background: rgba(0, 0, 0, 0.5);
+	padding: 0.25rem 0.5rem;
+	border-radius: 4px;
 }
 
-.handles > div {
+.handles>div {
 	position: absolute;
 	width: 1.5rem;
 	height: 1.5rem;
 	border-color: white;
-	touch-action: manipulation;
+	touch-action: none;
 	border-radius: 3px;
+	background-color: rgba(255, 255, 255, 0.15);
 }
 
 /* nw n ne */
@@ -450,6 +456,7 @@ input[type="number"]::-webkit-outer-spin-button {
 .handle-n {
 	border-top: 3px solid;
 }
+
 /* nw w sw */
 .handle-nw,
 .handle-w,
@@ -457,6 +464,7 @@ input[type="number"]::-webkit-outer-spin-button {
 	left: -3px;
 	border-left: 3px solid;
 }
+
 .handle-nw {
 	border-top: 3px solid;
 }
@@ -472,6 +480,7 @@ input[type="number"]::-webkit-outer-spin-button {
 .handle-ne {
 	border-top: 3px solid;
 }
+
 .handle-se {
 	border-bottom: 3px solid;
 }
@@ -489,6 +498,7 @@ input[type="number"]::-webkit-outer-spin-button {
 	bottom: -3px;
 	border-bottom: 3px solid;
 }
+
 .handle-sw {
 	border-left: 3px solid;
 }
@@ -505,6 +515,30 @@ input[type="number"]::-webkit-outer-spin-button {
 	transform: translate(0, -50%);
 }
 
-[data-slot="scroll-area-viewport"] > * {
+[data-slot="scroll-area-viewport"]>* {
 	display: block !important;
+}
+
+/* Mobile Safe Areas for iOS and Android WebViews (Pi Browser) */
+.pb-safe {
+	padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+}
+
+.pt-safe {
+	padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+}
+
+.touch-manipulation {
+	touch-action: manipulation;
+	-webkit-tap-highlight-color: transparent;
+}
+
+/* Smooth horizontal scrollbar for mobile menus */
+.no-scrollbar::-webkit-scrollbar {
+	display: none;
+}
+
+.no-scrollbar {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
 }

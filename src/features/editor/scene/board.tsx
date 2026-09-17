@@ -17,6 +17,7 @@ const SceneBoard = ({
 			style={{
 				width: size.width,
 				height: size.height,
+				position: "relative"
 			}}
 			className="pointer-events-auto"
 		>

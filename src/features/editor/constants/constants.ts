@@ -16,5 +16,5 @@ export const NORMAL_FONT_SIZE = 16;
 export const SMALL_FONT_SIZE = 12;
 
 // Dynamic timeline offset values
-export const TIMELINE_OFFSET_X_SMALL = 8;
+export const TIMELINE_OFFSET_X_SMALL = 0;
 export const TIMELINE_OFFSET_X_LARGE = 40;

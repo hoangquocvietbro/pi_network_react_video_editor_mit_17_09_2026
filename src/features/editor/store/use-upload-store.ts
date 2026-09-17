@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { processUpload, type UploadCallbacks } from "@/utils/upload-service";
-
+import { nanoid } from "nanoid";
 interface UploadFile {
 	id: string;
 	file?: File;
@@ -10,6 +10,27 @@ interface UploadFile {
 	status?: 'pending' | 'uploading' | 'uploaded' | 'failed';
 	progress?: number;
 	error?: string;
+}
+// New LocalMedia interface for blob URL workflow
+export interface LocalMedia {
+	id: string;
+	type: 'video' | 'audio' | 'image';
+	source: 'local' | 'url';
+
+	// Local file data
+	file?: File;
+	blobUrl?: string;
+
+	// URL import data
+	originalUrl?: string;
+
+	// Display info
+	name: string;
+	thumbnail?: string;
+
+	// Upload status (for SSR export)
+	uploaded: boolean;
+	serverUrl?: string;
 }
 
 interface IUploadStore {
@@ -38,6 +59,18 @@ interface IUploadStore {
 	removeUpload: (id: string) => void;
 	uploads: any[];
 	setUploads: (uploads: any[] | ((prev: any[]) => any[])) => void;
+
+	// LocalMedia functions
+	localMedias: LocalMedia[];
+	addLocalMedia: (file: File, thumbnail?: string) => LocalMedia;
+	addUrlMedia: (url: string, type: 'video' | 'audio' | 'image', thumbnail?: string) => LocalMedia;
+	removeLocalMedia: (id: string) => void;
+	getLocalMediaBySrc: (src: string) => LocalMedia | undefined;
+	markMediaUploaded: (id: string, serverUrl: string) => void;
+
+	// Expired media functions
+	isMediaExpired: (media: LocalMedia) => boolean;
+	reuploadMedia: (id: string, file: File, thumbnail?: string) => string; // Returns new blobUrl
 }
 
 const useUploadStore = create<IUploadStore>()(
@@ -78,7 +111,7 @@ const useUploadStore = create<IUploadStore>()(
 			activeUploads: [],
 			processUploads: () => {
 				const { pendingUploads, activeUploads, updateUploadProgress, setUploadStatus, removeUpload, setUploads } = get();
-				
+
 				// Move pending uploads to active with 'uploading' status
 				if (pendingUploads.length > 0) {
 					set((state) => ({
@@ -92,7 +125,7 @@ const useUploadStore = create<IUploadStore>()(
 
 				// Get updated activeUploads after moving pending ones
 				const currentActiveUploads = get().activeUploads;
-				
+
 				const callbacks: UploadCallbacks = {
 					onProgress: (uploadId, progress) => {
 						console.log("progress", progress, uploadId);
@@ -149,10 +182,137 @@ const useUploadStore = create<IUploadStore>()(
 							? (uploads as (prev: any[]) => any[])(state.uploads)
 							: uploads,
 				})),
+			// LocalMedia implementations
+			localMedias: [],
+
+			addLocalMedia: (file: File, thumbnail?: string) => {
+				const blobUrl = URL.createObjectURL(file);
+				const type = file.type.startsWith('video/') ? 'video'
+					: file.type.startsWith('audio/') ? 'audio'
+						: 'image';
+
+				const media: LocalMedia = {
+					id: nanoid(),
+					type,
+					source: 'local',
+					file,
+					blobUrl,
+					name: file.name,
+					thumbnail,
+					uploaded: false,
+				};
+
+				set((state) => ({
+					localMedias: [...state.localMedias, media]
+				}));
+
+				return media;
+			},
+
+			addUrlMedia: (url: string, type: 'video' | 'audio' | 'image', thumbnail?: string) => {
+				// Extract name from URL
+				const urlObj = new URL(url);
+				const pathParts = urlObj.pathname.split('/');
+				const name = pathParts[pathParts.length - 1] || url.slice(0, 30);
+
+				const media: LocalMedia = {
+					id: nanoid(),
+					type,
+					source: 'url',
+					originalUrl: url,
+					name,
+					thumbnail,
+					uploaded: true, // URL media doesn't need upload
+					serverUrl: url,
+				};
+
+				set((state) => ({
+					localMedias: [...state.localMedias, media]
+				}));
+
+				return media;
+			},
+
+			removeLocalMedia: (id: string) => {
+				const state = get();
+				const media = state.localMedias.find(m => m.id === id);
+
+				// Revoke blob URL if it's a local file
+				if (media?.blobUrl) {
+					URL.revokeObjectURL(media.blobUrl);
+				}
+
+				set((state) => ({
+					localMedias: state.localMedias.filter(m => m.id !== id)
+				}));
+			},
+
+			getLocalMediaBySrc: (src: string) => {
+				const state = get();
+				return state.localMedias.find(m =>
+					m.blobUrl === src || m.originalUrl === src || m.serverUrl === src
+				);
+			},
+
+			markMediaUploaded: (id: string, serverUrl: string) => {
+				set((state) => ({
+					localMedias: state.localMedias.map(m =>
+						m.id === id ? { ...m, uploaded: true, serverUrl } : m
+					)
+				}));
+			},
+
+			// Check if local media is expired (file lost after refresh)
+			isMediaExpired: (media: LocalMedia) => {
+				// URL media is never expired
+				if (media.source === 'url') return false;
+				// Local media is expired if file is missing
+				return !media.file;
+			},
+
+			// Re-upload expired media with new file
+			reuploadMedia: (id: string, file: File, thumbnail?: string) => {
+				const state = get();
+				const media = state.localMedias.find(m => m.id === id);
+
+				if (!media) {
+					throw new Error(`Media with id ${id} not found`);
+				}
+
+				// Revoke old blob URL if exists
+				if (media.blobUrl) {
+					URL.revokeObjectURL(media.blobUrl);
+				}
+
+				// Create new blob URL
+				const newBlobUrl = URL.createObjectURL(file);
+
+				// Update media in store
+				set((state) => ({
+					localMedias: state.localMedias.map(m =>
+						m.id === id ? {
+							...m,
+							file,
+							blobUrl: newBlobUrl,
+							thumbnail: thumbnail || m.thumbnail,
+							uploaded: false, // Reset upload status
+							serverUrl: undefined,
+						} : m
+					)
+				}));
+
+				return newBlobUrl;
+			},
 		}),
 		{
 			name: 'upload-store',
-			partialize: (state) => ({ uploads: state.uploads }),
+			partialize: (state) => ({
+				uploads: state.uploads,
+				localMedias: state.localMedias.map(m => ({
+					...m,
+					file: undefined, // Don't persist File objects
+				}))
+			})
 		}
 	)
 );

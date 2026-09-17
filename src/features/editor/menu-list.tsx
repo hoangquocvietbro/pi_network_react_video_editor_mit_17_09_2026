@@ -1,4 +1,4 @@
-import { memo, useCallback } from "react";
+import { memo, useCallback, useState } from "react";
 import useLayoutStore from "./store/use-layout-store";
 import { Icons } from "@/components/shared/icons";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,9 @@ import {
 } from "@/components/ui/drawer";
 import { MenuItem } from "./menu-item/menu-item";
 import { useIsLargeScreen } from "@/hooks/use-media-query";
-
+import { useAuthStore } from "../../store/use-auth-store";
+import { ExportLoginPrompt } from "../../components/auth/export-login-prompt";
+import { Lock } from "lucide-react";
 // Define menu items configuration for better maintainability
 const MENU_ITEMS = [
 	{
@@ -19,30 +21,35 @@ const MENU_ITEMS = [
 		icon: Icons.upload,
 		label: "Uploads",
 		ariaLabel: "Add and manage uploads",
+		requiresAuth: false
 	},
 	{
 		id: "texts",
 		icon: Icons.type,
 		label: "Texts",
 		ariaLabel: "Add and edit text elements",
+		requiresAuth: false
 	},
 	{
 		id: "videos",
 		icon: Icons.video,
 		label: "Videos",
 		ariaLabel: "Add and manage video content",
+		requiresAuth: false
 	},
 	{
 		id: "images",
 		icon: Icons.image,
 		label: "Images",
 		ariaLabel: "Add and manage images",
+		requiresAuth: false
 	},
 	{
 		id: "audios",
 		icon: Icons.audio,
 		label: "Audio",
 		ariaLabel: "Add and manage audio content",
+		requiresAuth: false
 	},
 ] as const;
 
@@ -50,19 +57,21 @@ const MENU_ITEMS = [
 const MenuButton = memo<{
 	item: (typeof MENU_ITEMS)[number];
 	isActive: boolean;
-	onClick: (menuItem: string) => void;
-}>(({ item, isActive, onClick }) => {
+	isAuthenticated: boolean;
+	onClick: (menuItem: string, requiresAuth: boolean) => void;
+}>(({ item, isActive, isAuthenticated, onClick }) => {
 	const handleClick = useCallback(() => {
-		onClick(item.id);
-	}, [item.id, onClick]);
+		onClick(item.id, item.requiresAuth);
+	}, [item.id, item.requiresAuth, onClick]);
 
 	const IconComponent = item.icon;
+	const showLockIcon = item.requiresAuth && !isAuthenticated;
 
 	return (
 		<Button
 			onClick={handleClick}
 			className={cn(
-				"transition-colors duration-200 hover:bg-secondary/80",
+				"relative transition-colors duration-200 hover:bg-secondary/80",
 				isActive
 					? "bg-secondary text-secondary-foreground"
 					: "text-muted-foreground hover:text-foreground",
@@ -73,6 +82,9 @@ const MenuButton = memo<{
 			aria-pressed={isActive}
 		>
 			{IconComponent ? <IconComponent width={16} height={16} /> : null}
+			{showLockIcon && (
+				<Lock className="absolute -top-0.5 -right-0.5 w-3 h-3 text-yellow-500" />
+			)}
 		</Button>
 	);
 });
@@ -89,11 +101,18 @@ function MenuList() {
 		drawerOpen,
 		setDrawerOpen,
 	} = useLayoutStore();
-
+	const { isAuthenticated } = useAuthStore();
+	const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 	const isLargeScreen = useIsLargeScreen();
 
 	const handleMenuItemClick = useCallback(
-		(menuItem: string) => {
+		(menuItem: string, requiresAuth: boolean) => {
+			// Check if feature requires auth and user is not authenticated
+			if (requiresAuth && !isAuthenticated) {
+				setShowLoginPrompt(true);
+				return;
+			}
+
 			setActiveMenuItem(menuItem as any);
 			// Use drawer on mobile, sidebar on desktop
 			if (!isLargeScreen) {
@@ -102,7 +121,7 @@ function MenuList() {
 				setShowMenuItem(true);
 			}
 		},
-		[isLargeScreen, setActiveMenuItem, setDrawerOpen, setShowMenuItem],
+		[isAuthenticated, isLargeScreen, setActiveMenuItem, setDrawerOpen, setShowMenuItem]
 	);
 
 	const handleDrawerOpenChange = useCallback(
@@ -129,6 +148,7 @@ function MenuList() {
 							key={item.id}
 							item={item}
 							isActive={isActive}
+							isAuthenticated={isAuthenticated}
 							onClick={handleMenuItemClick}
 						/>
 					);
@@ -148,6 +168,13 @@ function MenuList() {
 					</DrawerContent>
 				</Drawer>
 			)}
+
+			{/* Login prompt for premium features */}
+			<ExportLoginPrompt
+				open={showLoginPrompt}
+				onOpenChange={setShowLoginPrompt}
+				remainingExports={0}
+			/>
 		</>
 	);
 }

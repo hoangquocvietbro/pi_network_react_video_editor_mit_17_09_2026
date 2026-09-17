@@ -6,8 +6,12 @@ import {
 	BackgroundUploadRunner,
 } from "@/components/store-initializer";
 import { QueryProvider } from "@/components/query-provider";
+
 import { Analytics } from "@vercel/analytics/react";
 import { Outfit } from "next/font/google";
+import { AuthDebug } from "@/components/debug/auth-debug";
+import { RoutingTest } from "@/components/debug/routing-test";
+import { PiAuthProvider } from "@/contexts/pi-auth-context";
 
 import "./globals.css";
 
@@ -28,10 +32,21 @@ const outfit = Outfit({
 	weight: ["300", "400", "500", "600", "700"],
 });
 
+import type { Viewport } from "next";
+
+export const viewport: Viewport = {
+	width: "device-width",
+	initialScale: 1,
+	maximumScale: 1,
+	userScalable: false,
+	viewportFit: "cover",
+	themeColor: "#09090b"
+};
+
 export const metadata = createMetadata({
 	title: {
-		template: "%s | Combo",
-		default: "Combo",
+		template: "%s | VEditor",
+		default: "VEditor"
 	},
 	description: "AI Video generator for the next gen web.",
 	metadataBase: baseUrl,
@@ -44,16 +59,23 @@ export default async function RootLayout({
 }>) {
 	return (
 		<html lang="en">
+			<head>
+				<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+			</head>
 			<body
 				className={`${geistMono.variable} ${geist.variable} ${outfit.variable} antialiased dark font-sans bg-muted`}
 			>
-				<QueryProvider>
-					{children}
-					<StoreInitializer />
-					<BackgroundUploadRunner />
-					<Toaster />
-				</QueryProvider>
-				<Analytics />
+				<PiAuthProvider>
+					<QueryProvider>
+						{children}
+						<StoreInitializer />
+						<BackgroundUploadRunner />
+						<Toaster />
+						{/* <AuthDebug />
+            			<RoutingTest /> */}
+					</QueryProvider>
+					<Analytics />
+				</PiAuthProvider>
 			</body>
 		</html>
 	);

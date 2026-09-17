@@ -180,12 +180,12 @@ const Alpha: FC<TPropsCompAlpha> = ({ color, alpha, onChange, setChange }) => {
 			<Background background={getBackground()} />
 			<Pointer left={alpha || 0} backgroundColor={getPointerBackground()} />
 			<div
-				css={css`
-          position: absolute;
-          height: 100%;
-          width: 100%;
-          cursor: grab;
-        `}
+				style={{
+					position: "absolute",
+					height: "100%",
+					width: "100%",
+					cursor: "grab",
+				}}
 			/>
 		</Container>
 	);

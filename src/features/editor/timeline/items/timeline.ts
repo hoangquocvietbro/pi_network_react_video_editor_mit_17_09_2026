@@ -5,6 +5,27 @@ import Audio from "./audio";
 import { TimelineOptions } from "@designcombo/timeline";
 import { ITimelineScaleState } from "@designcombo/types";
 
+if (typeof window !== "undefined" && typeof TouchEvent !== "undefined") {
+	if (!("clientX" in TouchEvent.prototype)) {
+		Object.defineProperty(TouchEvent.prototype, "clientX", {
+			get(this: TouchEvent) {
+				const touch = this.changedTouches?.[0] || this.touches?.[0];
+				return touch ? touch.clientX : 0;
+			},
+			configurable: true,
+		});
+	}
+	if (!("clientY" in TouchEvent.prototype)) {
+		Object.defineProperty(TouchEvent.prototype, "clientY", {
+			get(this: TouchEvent) {
+				const touch = this.changedTouches?.[0] || this.touches?.[0];
+				return touch ? touch.clientY : 0;
+			},
+			configurable: true,
+		});
+	}
+}
+
 class Timeline extends TimelineBase {
 	public isShiftKey: boolean = false;
 	constructor(
@@ -20,6 +41,30 @@ class Timeline extends TimelineBase {
 		// Add shift keyboard listener
 		window.addEventListener("keydown", this.handleKeyDown);
 		window.addEventListener("keyup", this.handleKeyUp);
+	}
+
+	public _handleEvent(e: Event, type: string) {
+		if (e && (e as any).clientX === undefined) {
+			const touch =
+				(e as TouchEvent).changedTouches?.[0] ||
+				(e as TouchEvent).touches?.[0];
+			if (touch) {
+				try {
+					Object.defineProperty(e, "clientX", {
+						value: touch.clientX,
+						configurable: true,
+					});
+					Object.defineProperty(e, "clientY", {
+						value: touch.clientY,
+						configurable: true,
+					});
+				} catch {
+					// Fallback if property definition is blocked
+				}
+			}
+		}
+		// @ts-ignore
+		super._handleEvent?.(e, type);
 	}
 
 	private handleKeyDown = (event: KeyboardEvent) => {

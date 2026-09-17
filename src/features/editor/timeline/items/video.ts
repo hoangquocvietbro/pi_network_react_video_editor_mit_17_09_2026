@@ -78,7 +78,7 @@ class Video extends Trimmable {
 	private fallbackSegmentsCount = 0;
 	private previewUrl = "";
 
- 
+
 	constructor(props: VideoProps) {
 		super(props);
 		this.id = props.id;
@@ -191,7 +191,7 @@ class Video extends Trimmable {
 			1 +
 			Math.round(
 				(widthOnScreen + leftBacklogSize + rightBacklogSize) /
-					this.thumbnailWidth,
+				this.thumbnailWidth,
 			);
 
 		return {
@@ -211,7 +211,11 @@ class Video extends Trimmable {
 		return new Promise<void>((resolve) => {
 			const img = new Image();
 			img.crossOrigin = "anonymous";
-			img.src = `${fallbackThumbnail}?t=${Date.now()}`;
+
+			// Don't append cache-buster to base64 data URLs (they are already unique)
+			const isDataUrl = fallbackThumbnail.startsWith('data:');
+			img.src = isDataUrl ? fallbackThumbnail : `${fallbackThumbnail}?t=${Date.now()}`;
+
 			img.onload = () => {
 				// Create a temporary canvas to resize the image
 				const canvas = document.createElement("canvas");
@@ -234,6 +238,11 @@ class Video extends Trimmable {
 				this.aspectRatio = aspectRatio;
 				this.thumbnailWidth = targetWidth;
 				this.thumbnailCache.setThumbnail("fallback", resizedImg);
+				resolve();
+			};
+
+			img.onerror = () => {
+				console.warn('[Video] Failed to load fallback thumbnail:', fallbackThumbnail.slice(0, 50));
 				resolve();
 			};
 		});

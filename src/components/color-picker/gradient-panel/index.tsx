@@ -274,12 +274,12 @@ const GradientPanel: FC<IPropsPanel> = ({
 
 	return (
 		<div
-			css={css`
-        flex-direction: column;
-        display: flex;
-        z-index: 1;
-        gap: 16px;
-      `}
+			style={{
+				flexDirection: "column",
+				display: "flex",
+				zIndex: 1,
+				gap: "16px",
+			}}
 		>
 			<div
 				className="gradient-result"
@@ -299,9 +299,8 @@ const GradientPanel: FC<IPropsPanel> = ({
 				>
 					<div
 						style={{
-							transform: `rotate(${
-								typeof modifier === "number" ? `${modifier - 90}deg` : modifier
-							})`,
+							transform: `rotate(${typeof modifier === "number" ? `${modifier - 90}deg` : modifier
+								})`,
 						}}
 					/>
 				</div>

@@ -10,6 +10,12 @@ import { formatTimelineUnit } from "../utils/format";
 import useStore from "../store/use-store";
 import { debounce } from "lodash";
 import { useTimelineOffsetX } from "../hooks/use-timeline-offset";
+import { dispatch } from "@designcombo/events";
+import { TIMELINE_SCALE_CHANGED } from "@designcombo/state";
+import { TIMELINE_PREFIX } from "@designcombo/timeline";
+import { TIMELINE_ZOOM_LEVELS } from "../constants/scale";
+import { findIndex } from "../utils/search";
+import { timeMsToUnits, unitsToTimeMs } from "../utils/timeline";
 
 interface RulerProps {
 	height?: number;
@@ -45,8 +51,9 @@ const Ruler = (props: RulerProps) => {
 		height: height, // Increased height for text space
 	});
 
-	// Drag state
+	// Drag & Pinch state
 	const [isDragging, setIsDragging] = useState(false);
+	const [isPinching, setIsPinching] = useState(false);
 	const [hasDragged, setHasDragged] = useState(false);
 	const dragRef = useRef({
 		startX: 0,
@@ -54,6 +61,17 @@ const Ruler = (props: RulerProps) => {
 		isDragging: false,
 		hasDragged: false,
 	});
+	const pinchRef = useRef({
+		isPinching: false,
+		startDistance: 0,
+		startZoom: 1,
+		startScrollLeft: 0,
+		midX: 0,
+	});
+	const rafRef = useRef<number | null>(null);
+	const pendingScaleRef = useRef<{ zoom: number; scrollLeft: number } | null>(
+		null,
+	);
 
 	useEffect(() => {
 		const canvas = canvasRef.current;
@@ -208,15 +226,43 @@ const Ruler = (props: RulerProps) => {
 		};
 
 		// Prevent text selection during drag
-		event.preventDefault();
+		if (event.cancelable) {
+			event.preventDefault();
+		}
 	};
 
 	const handleTouchStart = (event: React.TouchEvent<HTMLCanvasElement>) => {
-		console.log("Ruler touch start");
 		const canvas = canvasRef.current;
 		if (!canvas) return;
 
 		const rect = canvas.getBoundingClientRect();
+
+		// Handle two-finger pinch gesture start
+		if (event.touches.length >= 2) {
+			const touch1 = event.touches[0];
+			const touch2 = event.touches[1];
+			const distance = Math.hypot(
+				touch1.clientX - touch2.clientX,
+				touch1.clientY - touch2.clientY,
+			);
+			const midX = (touch1.clientX + touch2.clientX) / 2 - rect.left;
+
+			pinchRef.current = {
+				isPinching: true,
+				startDistance: Math.max(1, distance),
+				startZoom: scale.zoom,
+				startScrollLeft: scrollLeft,
+				midX,
+			};
+
+			setIsPinching(true);
+			setIsDragging(false);
+			dragRef.current.isDragging = false;
+			dragRef.current.hasDragged = true;
+			return;
+		}
+
+		// Single touch drag
 		const touch = event.touches[0];
 		const touchX = touch.clientX - rect.left;
 
@@ -230,9 +276,6 @@ const Ruler = (props: RulerProps) => {
 			isDragging: true,
 			hasDragged: false,
 		};
-
-		// Prevent default touch behavior
-		event.preventDefault();
 	};
 
 	const handleMouseMove = useCallback(
@@ -250,14 +293,12 @@ const Ruler = (props: RulerProps) => {
 			if (deltaX > 5) {
 				dragRef.current.hasDragged = true;
 				setHasDragged(true);
-				console.log("Ruler mouse move", dragRef.current.isDragging);
 
 				const newScrollLeft = Math.max(
 					0,
 					dragRef.current.startScrollPos + (dragRef.current.startX - currentX),
 				);
 
-				console.log("New scroll left:", newScrollLeft);
 				onScroll?.(newScrollLeft);
 			}
 		},
@@ -265,14 +306,118 @@ const Ruler = (props: RulerProps) => {
 	);
 
 	const handleTouchMove = useCallback(
-		(event: React.TouchEvent<HTMLCanvasElement>) => {
-			if (!dragRef.current.isDragging) return;
-
+		(event: React.TouchEvent<HTMLCanvasElement> | TouchEvent) => {
 			const canvas = canvasRef.current;
 			if (!canvas) return;
 
+			// Handle two-finger pinch zoom
+			if (event.touches.length >= 2) {
+				if (!pinchRef.current.isPinching) {
+					const touch1 = event.touches[0];
+					const touch2 = event.touches[1];
+					const rect = canvas.getBoundingClientRect();
+					const distance = Math.hypot(
+						touch1.clientX - touch2.clientX,
+						touch1.clientY - touch2.clientY,
+					);
+					const midX = (touch1.clientX + touch2.clientX) / 2 - rect.left;
+					pinchRef.current = {
+						isPinching: true,
+						startDistance: Math.max(1, distance),
+						startZoom: scale.zoom,
+						startScrollLeft: scrollLeft,
+						midX,
+					};
+					setIsPinching(true);
+					setIsDragging(false);
+					dragRef.current.isDragging = false;
+					dragRef.current.hasDragged = true;
+				}
+
+				if (event.cancelable) {
+					event.preventDefault();
+				}
+
+				const touch1 = event.touches[0];
+				const touch2 = event.touches[1];
+				const currentDistance = Math.hypot(
+					touch1.clientX - touch2.clientX,
+					touch1.clientY - touch2.clientY,
+				);
+
+				const ratio = currentDistance / pinchRef.current.startDistance;
+				const newZoom = pinchRef.current.startZoom * ratio;
+
+				const minZoom = TIMELINE_ZOOM_LEVELS[0].zoom;
+				const maxZoom =
+					TIMELINE_ZOOM_LEVELS[TIMELINE_ZOOM_LEVELS.length - 1].zoom;
+				const clampedZoom = Math.max(minZoom, Math.min(newZoom, maxZoom));
+
+				// Keep time at midpoint stationary under the pinch fingers
+				const focalX =
+					pinchRef.current.midX - offsetX + pinchRef.current.startScrollLeft;
+				const timeAtFocal = unitsToTimeMs(focalX, pinchRef.current.startZoom);
+
+				let targetScroll = pinchRef.current.startScrollLeft;
+				if (Number.isFinite(timeAtFocal)) {
+					const newFocalUnits = timeMsToUnits(timeAtFocal, clampedZoom);
+					targetScroll = Math.max(
+						0,
+						newFocalUnits - (pinchRef.current.midX - offsetX),
+					);
+				}
+
+				pendingScaleRef.current = {
+					zoom: clampedZoom,
+					scrollLeft: targetScroll,
+				};
+
+				if (rafRef.current === null) {
+					rafRef.current = requestAnimationFrame(() => {
+						rafRef.current = null;
+						if (!pendingScaleRef.current) return;
+						const { zoom: targetZoom, scrollLeft: nextScroll } =
+							pendingScaleRef.current;
+
+						const fitIndex = findIndex(
+							TIMELINE_ZOOM_LEVELS,
+							(level) => level.zoom > targetZoom,
+						);
+						const clampedIndex = Math.max(
+							0,
+							Math.min(fitIndex, TIMELINE_ZOOM_LEVELS.length - 1),
+						);
+						const segments =
+							TIMELINE_ZOOM_LEVELS[clampedIndex]?.segments ?? 5;
+
+						dispatch(TIMELINE_SCALE_CHANGED, {
+							payload: {
+								scale: {
+									index: clampedIndex,
+									unit: 1 / targetZoom,
+									zoom: targetZoom,
+									segments,
+								},
+							},
+						});
+
+						onScroll?.(nextScroll);
+						dispatch(`${TIMELINE_PREFIX}:scroll:to`, {
+							payload: { scrollLeft: nextScroll },
+						});
+					});
+				}
+
+				return;
+			}
+
+			// Single-finger drag
+			if (pinchRef.current.isPinching) return;
+			if (!dragRef.current.isDragging) return;
+
 			const rect = canvas.getBoundingClientRect();
 			const touch = event.touches[0];
+			if (!touch) return;
 			const currentX = touch.clientX - rect.left;
 			const deltaX = Math.abs(dragRef.current.startX - currentX);
 
@@ -280,26 +425,19 @@ const Ruler = (props: RulerProps) => {
 			if (deltaX > 5) {
 				dragRef.current.hasDragged = true;
 				setHasDragged(true);
-				console.log("Ruler touch move", dragRef.current.isDragging);
 
 				const newScrollLeft = Math.max(
 					0,
 					dragRef.current.startScrollPos + (dragRef.current.startX - currentX),
 				);
 
-				console.log("New scroll left:", newScrollLeft);
 				onScroll?.(newScrollLeft);
 			}
 		},
-		[onScroll],
+		[onScroll, offsetX, scale.zoom, scrollLeft],
 	);
 
 	const handleMouseUp = useCallback(() => {
-		console.log(
-			"Ruler mouse up",
-			dragRef.current.isDragging,
-			dragRef.current.hasDragged,
-		);
 		if (dragRef.current.isDragging) {
 			dragRef.current.isDragging = false;
 			dragRef.current.hasDragged = false;
@@ -309,11 +447,14 @@ const Ruler = (props: RulerProps) => {
 	}, []);
 
 	const handleTouchEnd = useCallback(() => {
-		console.log(
-			"Ruler touch end",
-			dragRef.current.isDragging,
-			dragRef.current.hasDragged,
-		);
+		if (pinchRef.current.isPinching) {
+			pinchRef.current.isPinching = false;
+			setIsPinching(false);
+			dragRef.current.isDragging = false;
+			dragRef.current.hasDragged = true;
+			setIsDragging(false);
+			setHasDragged(false);
+		}
 		if (dragRef.current.isDragging) {
 			dragRef.current.isDragging = false;
 			dragRef.current.hasDragged = false;
@@ -323,8 +464,6 @@ const Ruler = (props: RulerProps) => {
 	}, []);
 
 	const handleLocalMouseUp = (event: React.MouseEvent<HTMLCanvasElement>) => {
-		console.log("Ruler local mouse up");
-
 		// Check if we dragged before resetting state
 		const wasDragging = dragRef.current.isDragging;
 		const hadDragged = dragRef.current.hasDragged;
@@ -339,7 +478,6 @@ const Ruler = (props: RulerProps) => {
 
 		// Only handle click if we haven't dragged at all
 		if (!hadDragged) {
-			console.log("Ruler click - seeking to position");
 			const canvas = canvasRef.current;
 			if (!canvas) return;
 
@@ -352,13 +490,20 @@ const Ruler = (props: RulerProps) => {
 				clickX + scrollLeft - timelineOffsetX - TIMELINE_OFFSET_CANVAS_LEFT;
 
 			onClick?.(totalX);
-		} else {
-			console.log("Ruler drag ended - no click action");
 		}
 	};
 
 	const handleLocalTouchEnd = (event: React.TouchEvent<HTMLCanvasElement>) => {
-		console.log("Ruler local touch end");
+		const wasPinching = pinchRef.current.isPinching;
+		if (wasPinching) {
+			pinchRef.current.isPinching = false;
+			setIsPinching(false);
+			dragRef.current.isDragging = false;
+			dragRef.current.hasDragged = true;
+			setIsDragging(false);
+			setHasDragged(false);
+			return;
+		}
 
 		// Check if we dragged before resetting state
 		const wasDragging = dragRef.current.isDragging;
@@ -372,9 +517,8 @@ const Ruler = (props: RulerProps) => {
 			setHasDragged(false);
 		}
 
-		// Only handle tap if we haven't dragged at all
-		if (!hadDragged) {
-			console.log("Ruler tap - seeking to position");
+		// Only handle tap if we haven't dragged or pinched at all
+		if (!hadDragged && !wasPinching && event.changedTouches.length === 1) {
 			const canvas = canvasRef.current;
 			if (!canvas) return;
 
@@ -388,30 +532,40 @@ const Ruler = (props: RulerProps) => {
 				touchX + scrollLeft - timelineOffsetX - TIMELINE_OFFSET_CANVAS_LEFT;
 
 			onClick?.(totalX);
-		} else {
-			console.log("Ruler drag ended - no tap action");
 		}
 	};
 
-	// Add global mouse and touch event listeners for drag
+	// Cleanup any scheduled raf on unmount
 	useEffect(() => {
-		if (isDragging) {
+		return () => {
+			if (rafRef.current !== null) {
+				cancelAnimationFrame(rafRef.current);
+			}
+		};
+	}, []);
+
+	// Add global mouse and touch event listeners for drag and pinch
+	useEffect(() => {
+		if (isDragging || isPinching) {
 			document.addEventListener("mousemove", handleMouseMove);
 			document.addEventListener("mouseup", handleMouseUp);
 			document.addEventListener("touchmove", handleTouchMove as any, {
 				passive: false,
 			});
 			document.addEventListener("touchend", handleTouchEnd);
+			document.addEventListener("touchcancel", handleTouchEnd);
 
 			return () => {
 				document.removeEventListener("mousemove", handleMouseMove);
 				document.removeEventListener("mouseup", handleMouseUp);
 				document.removeEventListener("touchmove", handleTouchMove as any);
 				document.removeEventListener("touchend", handleTouchEnd);
+				document.removeEventListener("touchcancel", handleTouchEnd);
 			};
 		}
 	}, [
 		isDragging,
+		isPinching,
 		handleMouseMove,
 		handleMouseUp,
 		handleTouchMove,

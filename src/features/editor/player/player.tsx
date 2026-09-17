@@ -8,6 +8,16 @@ const Player = () => {
 	const { setPlayerRef, duration, fps, size, background } = useStore();
 
 	useEffect(() => {
+		if (playerRef.current) {
+			const originalSeekTo = playerRef.current.seekTo.bind(playerRef.current);
+			playerRef.current.seekTo = (frame: number) => {
+				if (typeof frame !== "number" || !Number.isFinite(frame)) {
+					console.warn("Ignored non-finite seekTo frame:", frame);
+					return;
+				}
+				return originalSeekTo(Math.max(0, Math.round(frame)));
+			};
+		}
 		setPlayerRef(playerRef as React.RefObject<PlayerRef>);
 	}, []);
 
@@ -18,9 +28,16 @@ const Player = () => {
 			durationInFrames={Math.round((duration / 1000) * fps) || 1}
 			compositionWidth={size.width}
 			compositionHeight={size.height}
-			className={`h-full w-full bg-[${background.value}]`}
+			style={{
+				position: "absolute",
+				top: 0,
+				left: 0,
+				width: size.width,
+				height: size.height
+			}}
 			fps={30}
 			overflowVisible
+			browserMediaControlsBehavior={{ mode: "do-nothing" }}
 		/>
 	);
 };

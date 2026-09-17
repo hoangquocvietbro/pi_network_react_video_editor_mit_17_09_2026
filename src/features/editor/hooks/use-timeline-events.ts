@@ -28,16 +28,24 @@ const useTimelineEvents = () => {
 		const timelineEventsSubscription = timelineEvents.subscribe((obj) => {
 			if (obj.key === TIMELINE_SEEK) {
 				const time = obj.value?.payload?.time;
-				if (playerRef?.current && typeof time === "number") {
-					playerRef.current.seekTo((time / 1000) * fps);
+				if (
+					playerRef?.current &&
+					typeof time === "number" &&
+					Number.isFinite(time)
+				) {
+					playerRef.current.seekTo(Math.max(0, (time / 1000) * fps));
 				}
 			}
 		});
 		const playerEventsSubscription = playerEvents.subscribe((obj) => {
 			if (obj.key === PLAYER_SEEK) {
 				const time = obj.value?.payload?.time;
-				if (playerRef?.current && typeof time === "number") {
-					playerRef.current.seekTo((time / 1000) * fps);
+				if (
+					playerRef?.current &&
+					typeof time === "number" &&
+					Number.isFinite(time)
+				) {
+					playerRef.current.seekTo(Math.max(0, (time / 1000) * fps));
 				}
 			} else if (obj.key === PLAYER_PLAY) {
 				playerRef?.current?.play();
@@ -51,9 +59,15 @@ const useTimelineEvents = () => {
 				}
 			} else if (obj.key === PLAYER_SEEK_BY) {
 				const frames = obj.value?.payload?.frames;
-				if (playerRef?.current && typeof frames === "number") {
+				if (
+					playerRef?.current &&
+					typeof frames === "number" &&
+					Number.isFinite(frames)
+				) {
 					const safeCurrentFrame = getSafeCurrentFrame(playerRef);
-					playerRef.current.seekTo(Math.round(safeCurrentFrame) + frames);
+					playerRef.current.seekTo(
+						Math.max(0, Math.round(safeCurrentFrame) + frames),
+					);
 				}
 			}
 		});

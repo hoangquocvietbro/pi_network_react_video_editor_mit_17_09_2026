@@ -6,10 +6,10 @@ import {
 	LAYER_DELETE,
 	TIMELINE_SCALE_CHANGED,
 } from "@designcombo/state";
-import { PLAYER_PAUSE, PLAYER_PLAY } from "../constants/events";
+import { PLAYER_PAUSE, PLAYER_PLAY, PLAYER_SEEK, PLAYER_SEEK_BY } from "../constants/events";
 import { frameToTimeString, getCurrentTime, timeToString } from "../utils/time";
 import useStore from "../store/use-store";
-import { SquareSplitHorizontal, Trash, ZoomIn, ZoomOut } from "lucide-react";
+import { SquareSplitHorizontal, Trash, ZoomIn, ZoomOut, Copy } from "lucide-react";
 import {
 	getFitZoomLevel,
 	getNextZoomLevel,
@@ -23,6 +23,7 @@ import useUpdateAnsestors from "../hooks/use-update-ansestors";
 import { ITimelineScaleState } from "@designcombo/types";
 import { useIsLargeScreen } from "@/hooks/use-media-query";
 import { useTimelineOffsetX } from "../hooks/use-timeline-offset";
+import { TIMELINE_PREFIX } from "@designcombo/timeline";
 
 const IconPlayerPlayFilled = ({ size }: { size: number }) => (
 	<svg
@@ -101,7 +102,21 @@ const Header = () => {
 			},
 		});
 	};
+	const handleSkipBack = () => {
+		dispatch(PLAYER_SEEK, {
+			payload: {
+				time: 0
+			}
+		});
+	};
 
+	const handleSkipForward = () => {
+		dispatch(PLAYER_SEEK_BY, {
+			payload: {
+				frames: Math.round(fps)
+			}
+		});
+	};
 	const changeScale = (scale: ITimelineScaleState) => {
 		dispatch(TIMELINE_SCALE_CHANGED, {
 			payload: {
@@ -159,17 +174,18 @@ const Header = () => {
 						display: "grid",
 						gridTemplateColumns: isLargeScreen
 							? "1fr 260px 1fr"
-							: "1fr 1fr 1fr",
+							: "auto 1fr auto",
 						alignItems: "center",
 					}}
 				>
-					<div className="flex px-2">
+					<div className="flex px-1 sm:px-2 items-center gap-0.5">
 						<Button
 							disabled={!activeIds.length}
 							onClick={doActiveDelete}
 							variant={"ghost"}
 							size={isLargeScreen ? "sm" : "icon"}
-							className="flex items-center gap-1 px-2"
+							className="flex items-center gap-1 px-1.5 h-8 w-8 sm:w-auto"
+							title="Delete selected layer"
 						>
 							<Trash size={14} />{" "}
 							<span className="hidden lg:block">Delete</span>
@@ -180,7 +196,8 @@ const Header = () => {
 							onClick={doActiveSplit}
 							variant={"ghost"}
 							size={isLargeScreen ? "sm" : "icon"}
-							className="flex items-center gap-1 px-2"
+							className="flex items-center gap-1 px-1.5 h-8 w-8 sm:w-auto"
+							title="Split layer at playhead"
 						>
 							<SquareSplitHorizontal size={15} />{" "}
 							<span className="hidden lg:block">Split</span>
@@ -192,19 +209,21 @@ const Header = () => {
 							}}
 							variant={"ghost"}
 							size={isLargeScreen ? "sm" : "icon"}
-							className="flex items-center gap-1 px-2"
+							className="flex items-center gap-1 px-1.5 h-8 w-8 sm:w-auto"
+							title="Clone selected layer"
 						>
-							<SquareSplitHorizontal size={15} />{" "}
+							<Copy size={14} />{" "}
 							<span className="hidden lg:block">Clone</span>
 						</Button>
 					</div>
 					<div className="flex items-center justify-center">
-						<div>
+						<div className="flex items-center">
 							<Button
-								className="hidden lg:inline-flex"
-								onClick={doActiveDelete}
+								className="hidden lg:inline-flex h-8 w-8 text-muted-foreground hover:text-foreground"
+								onClick={handleSkipBack}
 								variant={"ghost"}
 								size={"icon"}
+								title="Rewind to start"
 							>
 								<IconPlayerSkipBack size={14} />
 							</Button>
@@ -217,6 +236,8 @@ const Header = () => {
 								}}
 								variant={"ghost"}
 								size={"icon"}
+								className="h-8 w-8 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground shadow-sm mx-1 active:scale-95 transition-transform"
+								title={playing ? "Pause" : "Play"}
 							>
 								{playing ? (
 									<IconPlayerPauseFilled size={14} />
@@ -225,10 +246,11 @@ const Header = () => {
 								)}
 							</Button>
 							<Button
-								className="hidden lg:inline-flex"
-								onClick={doActiveSplit}
+								className="hidden lg:inline-flex h-8 w-8 text-muted-foreground hover:text-foreground"
+								onClick={handleSkipForward}
 								variant={"ghost"}
 								size={"icon"}
+								title="Skip forward 1 second"
 							>
 								<IconPlayerSkipForward size={14} />
 							</Button>
@@ -304,8 +326,16 @@ const ZoomControl = ({
 	};
 
 	const onZoomFitClick = () => {
-		const fitZoom = getFitZoomLevel(duration, scale.zoom, timelineOffsetX);
+		const fitZoom = getFitZoomLevel(duration, scale.zoom);
 		onChangeTimelineScale(fitZoom);
+		dispatch(`${TIMELINE_PREFIX}:scroll:to`, {
+			payload: { scrollLeft: 0 },
+		});
+		setTimeout(() => {
+			dispatch(`${TIMELINE_PREFIX}:scroll:to`, {
+				payload: { scrollLeft: 0 },
+			});
+		}, 50);
 	};
 
 	return (
@@ -331,7 +361,12 @@ const ZoomControl = ({
 				<Button size={"icon"} variant={"ghost"} onClick={onZoomInClick}>
 					<ZoomIn size={16} />
 				</Button>
-				<Button onClick={onZoomFitClick} variant={"ghost"} size={"icon"}>
+				<Button
+					onClick={onZoomFitClick}
+					variant={"ghost"}
+					size={"icon"}
+					title="Fit to timeline"
+				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						width="16"

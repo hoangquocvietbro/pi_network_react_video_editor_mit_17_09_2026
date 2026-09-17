@@ -6,10 +6,10 @@ export const calculateCropStyles = (
 ) => ({
 	width: details.width || "100%",
 	height: details.height || "auto",
-	top: -crop.y || 0,
-	left: -crop.x || 0,
-	position: "absolute",
-	borderRadius: `${Math.min(crop.width, crop.height) * ((details.borderRadius || 0) / 100)}px`,
+	top: -(crop?.y || 0),
+	left: -(crop?.x || 0),
+	position: "absolute" as const,
+	borderRadius: `${Math.min(crop?.width || details.width, crop?.height || details.height) * ((details.borderRadius || 0) / 100)}px`,
 });
 
 export const calculateMediaStyles = (
@@ -65,13 +65,14 @@ export const calculateContainerStyles = (
 		pointerEvents: "auto",
 		top: details.top || 0,
 		left: details.left || 0,
-		width: crop.width || details.width || "100%",
-		height: crop.height || details.height || "auto",
+		width: crop?.width || details.width || "100%",
+		height: crop?.height || details.height || "auto",
 		transform: details.transform || "none",
 		opacity: details.opacity !== undefined ? details.opacity / 100 : 1,
 		transformOrigin: details.transformOrigin || "center center",
 		filter: `brightness(${details.brightness}%) blur(${details.blur}px)`,
 		rotate: details.rotate || "0deg",
+		overflow: "hidden",
 		...overrides, // Merge overrides into the calculated styles
 	};
 };

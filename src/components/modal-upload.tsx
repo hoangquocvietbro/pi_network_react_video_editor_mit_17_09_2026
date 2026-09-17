@@ -14,6 +14,7 @@ import clsx from "clsx";
 import useUploadStore from "@/features/editor/store/use-upload-store";
 import axios from "axios";
 import { Input } from "./ui/input";
+import { nanoid } from "nanoid";
 type ModalUploadProps = {
 	type?: string;
 };
@@ -36,6 +37,34 @@ export const extractVideoThumbnail = (file: File) => {
 		video.onerror = () => resolve("");
 	});
 };
+
+/**
+ * Truncate long filenames while preserving the extension: "filename....ext"
+ */
+export const truncateFileName = (name: string, maxLength: number = 24): string => {
+	if (!name) return "";
+	if (name.length <= maxLength) return name;
+
+	const lastDotIndex = name.lastIndexOf(".");
+	if (lastDotIndex <= 0 || lastDotIndex === name.length - 1) {
+		const clean = name.slice(0, Math.max(3, maxLength - 3)).replace(/[._\- ]+$/, "");
+		return `${clean}...`;
+	}
+
+	const ext = name.slice(lastDotIndex);
+	const baseName = name.slice(0, lastDotIndex);
+	const safeExt = ext.length > 7 ? ext.slice(0, 6) : ext;
+	const availableBase = maxLength - 3 - safeExt.length;
+
+	if (availableBase <= 2) {
+		const clean = baseName.slice(0, Math.max(2, Math.min(4, baseName.length))).replace(/[._\- ]+$/, "");
+		return `${clean}...${safeExt}`;
+	}
+
+	const clean = baseName.slice(0, availableBase).replace(/[._\- ]+$/, "");
+	return `${clean}...${safeExt}`;
+};
+
 const ModalUpload: React.FC<ModalUploadProps> = ({ type = "all" }) => {
 	const {
 		setShowUploadModal,
@@ -64,7 +93,7 @@ const ModalUpload: React.FC<ModalUploadProps> = ({ type = "all" }) => {
 
 		const newFiles = selectedFiles
 			.filter((f) => !files.some((fileObj) => fileObj.file?.name === f.name))
-			.map((f) => ({ id: crypto.randomUUID(), file: f }));
+			.map((f) => ({ id: nanoid(), file: f }));
 
 		if (newFiles.length === 0) return;
 
@@ -101,7 +130,7 @@ const ModalUpload: React.FC<ModalUploadProps> = ({ type = "all" }) => {
 		if (e.dataTransfer.files) {
 			const newFiles = Array.from(e.dataTransfer.files)
 				.filter((f) => !files.some((fileObj) => fileObj.file?.name === f.name))
-				.map((f) => ({ id: crypto.randomUUID(), file: f }));
+				.map((f) => ({ id: nanoid(), file: f }));
 			if (newFiles.length === 0) return;
 
 			setFiles((prev) => [...newFiles, ...prev]);
@@ -163,40 +192,37 @@ const ModalUpload: React.FC<ModalUploadProps> = ({ type = "all" }) => {
 		return result.upload;
 	}
 	const handleUpload = async () => {
-		// Prepare UploadFile objects for files
-		const fileUploads = files
-			.filter((f) => f.file?.type)
-			.map((f) => ({
-				id: f.id,
-				file: f.file,
-				type: f.file?.type,
-				status: "pending" as const,
-				progress: 0,
-			}));
+		const { addLocalMedia, addUrlMedia } = useUploadStore.getState();
 
-		// Prepare UploadFile object for URL if present
-		const urlUploads = videoUrl.trim()
-			? [
-					{
-						id: crypto.randomUUID(),
-						url: videoUrl.trim(),
-						type: "url",
-						status: "pending" as const,
-						progress: 0,
-					},
-				]
-			: [];
+		// Process local files - create blob URLs, don't upload yet
+		for (const fileObj of files) {
+			if (fileObj.file) {
+				// Get thumbnail if available
+				const thumbnail = fileObj.file.type.startsWith("video/")
+					? videoThumbnails[fileObj.file.name]
+					: fileObj.file.type.startsWith("image/")
+						? URL.createObjectURL(fileObj.file)
+						: undefined;
 
-		// Add to pending uploads
-		addPendingUploads([...fileUploads, ...urlUploads]);
+				addLocalMedia(fileObj.file, thumbnail);
+			}
+		}
+		// Process URL if present
+		if (videoUrl.trim()) {
+			// Determine type from URL extension
+			const url = videoUrl.trim();
+			const ext = url.split('.').pop()?.toLowerCase() || '';
+			const type = ['mp4', 'webm', 'mov', 'avi'].includes(ext) ? 'video'
+				: ['mp3', 'wav', 'ogg', 'aac'].includes(ext) ? 'audio'
+					: 'image';
 
-		setTimeout(() => {
-			processUploads();
-			// Clear modal state and close
-			setFiles([]);
-			setShowUploadModal(false);
-			setVideoUrl("");
-		}, 0);
+			addUrlMedia(url, type);
+		}
+
+		// Clear modal state and close
+		setFiles([]);
+		setShowUploadModal(false);
+		setVideoUrl("");
 	};
 	const getAcceptType = () => {
 		switch (type) {
@@ -233,11 +259,10 @@ const ModalUpload: React.FC<ModalUploadProps> = ({ type = "all" }) => {
 							/>
 
 							<div
-								className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-									isDragOver
-										? "border-primary bg-primary/10"
-										: "border border-border hover:border-muted-foreground/50"
-								}`}
+								className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${isDragOver
+									? "border-primary bg-primary/10"
+									: "border border-border hover:border-muted-foreground/50"
+									}`}
 								onDragOver={handleDragOver}
 								onDragLeave={handleDragLeave}
 								onDrop={handleDrop}
@@ -263,7 +288,7 @@ const ModalUpload: React.FC<ModalUploadProps> = ({ type = "all" }) => {
 											{files.map((file) => (
 												<motion.div
 													key={file.id}
-													className="relative flex flex-col items-center p-1.5 sm:p-2 border rounded shadow-sm w-full"
+													className="relative flex flex-col items-center p-1.5 sm:p-2 border rounded shadow-sm w-full min-w-0 overflow-hidden"
 													initial={{ opacity: 0, scale: 0.8 }}
 													animate={{ opacity: 1, scale: 1 }}
 													exit={{ opacity: 0, scale: 0.8 }}
@@ -274,43 +299,41 @@ const ModalUpload: React.FC<ModalUploadProps> = ({ type = "all" }) => {
 													}}
 													layout
 												>
-													<div className="w-full flex justify-between items-center">
-														<div className="flex flex-1 gap-1 sm:gap-1.5 md:gap-2  items-center">
-															<div className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 flex items-center justify-center">
+													<div className="w-full flex justify-between items-center gap-2 min-w-0">
+														<div className="flex flex-1 min-w-0 gap-2 items-center">
+															<div className="w-7 h-7 sm:w-8 sm:h-8 shrink-0 flex items-center justify-center">
 																{file.file?.type.startsWith("image/") ? (
 																	<img
 																		src={URL.createObjectURL(file.file)}
 																		alt={file.file.name}
-																		className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 object-cover rounded border"
+																		className="h-7 w-7 sm:h-8 sm:w-8 object-cover rounded border"
 																	/>
 																) : file.file?.type.startsWith("video/") &&
 																	videoThumbnails[file.file.name] ? (
 																	<img
 																		src={videoThumbnails[file.file.name]}
 																		alt={`${file.file.name} thumbnail`}
-																		className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 object-cover rounded border"
+																		className="h-7 w-7 sm:h-8 sm:w-8 object-cover rounded border"
 																	/>
 																) : (
-																	<div className="h-5 w-5 sm:h-6 md:h-8 md:w-8 flex items-center justify-center rounded border bg-muted">
-																		<FileIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4 text-foreground" />
+																	<div className="h-7 w-7 sm:h-8 sm:w-8 flex items-center justify-center rounded border bg-muted">
+																		<FileIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-foreground" />
 																	</div>
 																)}
 															</div>
 
-															<div>
+															<div className="flex-1 min-w-0">
 																<div
-																	className="w-full truncate text-xs text-muted-foreground max-w-80"
+																	className="w-full truncate text-xs font-medium text-foreground"
 																	title={file.file?.name ?? ""}
 																>
-																	{file.file?.name ?? ""}
+																	{truncateFileName(file.file?.name ?? "", 24)}
 																</div>
-																<div
-																	className={clsx(
-																		"text-[9px] sm:text-[10px] text-gray-400",
-																	)}
-																>
+																<div className="text-[10px] text-muted-foreground">
 																	{file.file
-																		? `${(file.file.size / 1024).toFixed(2)} KB`
+																		? file.file.size > 1024 * 1024
+																			? `${(file.file.size / (1024 * 1024)).toFixed(1)} MB`
+																			: `${(file.file.size / 1024).toFixed(0)} KB`
 																		: ""}
 																</div>
 															</div>
@@ -322,9 +345,10 @@ const ModalUpload: React.FC<ModalUploadProps> = ({ type = "all" }) => {
 																handleRemoveFile(file.id, file.file)
 															}
 															size={"icon"}
-															className="cursor-pointer"
+															className="h-7 w-7 sm:h-8 sm:w-8 shrink-0 cursor-pointer"
+															title="Remove file"
 														>
-															<X className="h-4 w-4" />
+															<X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
 														</Button>
 													</div>
 												</motion.div>

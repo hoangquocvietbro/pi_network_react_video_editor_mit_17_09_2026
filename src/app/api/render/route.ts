@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-
+import { SERVER_ENV } from "../../../lib/server-env";
 export async function POST(request: Request) {
 	try {
 		const body = await request.json(); // Parse the request body
@@ -10,7 +10,7 @@ export async function POST(request: Request) {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
-				Authorization: "Bearer cb_bYQbTtE7Yb7R", // JWT Token from environment
+				Authorization: `Bearer ${SERVER_ENV.COMBO_SK}`
 			},
 			body: JSON.stringify(body),
 		});
@@ -53,7 +53,7 @@ export async function GET(request: Request) {
 
 		const response = await fetch(`https://api.combo.sh/v1/render/${id}`, {
 			headers: {
-				Authorization: `Bearer ${process.env.COMBO_SH_JWT}`, // JWT Token from environment
+				Authorization: `Bearer ${SERVER_ENV.COMBO_SH_JWT}` // JWT Token from environment
 			},
 		});
 

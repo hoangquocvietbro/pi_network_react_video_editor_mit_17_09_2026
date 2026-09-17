@@ -39,7 +39,7 @@ resolve '@/lib/public-env' in 'C:\Users\PC\Downloads\veditor_vip\modules\transit
       C:\Users\PC\node_modules doesn't exist or is not a directory
       C:\Users\node_modules doesn't exist or is not a directory
       C:\node_modules doesn't exist or is not a directory
-    at runWebpack (C:\Users\PC\Downloads\veditor_vip\node_modules\.pnpm\@remotion+bundler@4.0.441_@_a300ca3dfcb2b21eae66d30b3f940b64\node_modules\@remotion\bundler\dist\bundle.js:226:23)
-    at async internalBundle (C:\Users\PC\Downloads\veditor_vip\node_modules\.pnpm\@remotion+bundler@4.0.441_@_a300ca3dfcb2b21eae66d30b3f940b64\node_modules\@remotion\bundler\dist\bundle.js:230:13)
-    at async bundle (C:\Users\PC\Downloads\veditor_vip\node_modules\.pnpm\@remotion+bundler@4.0.441_@_a300ca3dfcb2b21eae66d30b3f940b64\node_modules\@remotion\bundler\dist\bundle.js:330:20)
+    at runWebpack (C:\Users\PC\Downloads\veditor_vip\node_modules\.pnpm\@remotion+bundler@4.0.525_@_a300ca3dfcb2b21eae66d30b3f940b64\node_modules\@remotion\bundler\dist\bundle.js:226:23)
+    at async internalBundle (C:\Users\PC\Downloads\veditor_vip\node_modules\.pnpm\@remotion+bundler@4.0.525_@_a300ca3dfcb2b21eae66d30b3f940b64\node_modules\@remotion\bundler\dist\bundle.js:230:13)
+    at async bundle (C:\Users\PC\Downloads\veditor_vip\node_modules\.pnpm\@remotion+bundler@4.0.525_@_a300ca3dfcb2b21eae66d30b3f940b64\node_modules\@remotion\bundler\dist\bundle.js:330:20)
     at async main (C:\Users\PC\Downloads\veditor_vip\scripts\render-video.ts:122:28)

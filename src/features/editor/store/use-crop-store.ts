@@ -2,11 +2,26 @@ import { create } from "zustand";
 
 type Area = [x: number, y: number, width: number, height: number];
 
+interface ICropRect {
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+}
+
 interface ICropState {
 	area: Area;
 	setArea: (area: Area) => void;
-	loadVideo: (src: string) => void;
-	loadImage: (src: string) => void;
+	loadVideo: (
+		src: string,
+		existingCrop?: ICropRect,
+		detailsSize?: { width: number; height: number },
+	) => void;
+	loadImage: (
+		src: string,
+		existingCrop?: ICropRect,
+		detailsSize?: { width: number; height: number },
+	) => void;
 	element: HTMLImageElement | HTMLVideoElement | undefined;
 	src: string;
 	fileLoading: boolean;
@@ -20,6 +35,58 @@ interface ICropState {
 		height: number;
 	};
 }
+
+const getCropConstraints = () => {
+	const isClient = typeof window !== "undefined";
+	const screenW = isClient ? window.innerWidth : 800;
+	const screenH = isClient ? window.innerHeight : 600;
+	const isMobile = screenW < 640;
+
+	// On mobile screens, fit neatly inside viewport with room for header, ratios, buttons
+	const maxWidth = isMobile
+		? Math.max(260, Math.min(screenW - 56, 380))
+		: Math.min(680, screenW - 280);
+
+	const maxHeight = isMobile
+		? Math.max(200, Math.min(screenH - 290, 320))
+		: Math.min(480, screenH - 240);
+
+	return { maxWidth, maxHeight };
+};
+
+const computeInitialArea = (
+	naturalW: number,
+	naturalH: number,
+	scaleFactor: number,
+	existingCrop?: ICropRect,
+	detailsSize?: { width: number; height: number },
+): Area => {
+	const previewW = naturalW * scaleFactor;
+	const previewH = naturalH * scaleFactor;
+
+	if (
+		existingCrop &&
+		detailsSize &&
+		detailsSize.width > 0 &&
+		detailsSize.height > 0 &&
+		existingCrop.width > 0 &&
+		existingCrop.height > 0
+	) {
+		const rx = previewW / detailsSize.width;
+		const ry = previewH / detailsSize.height;
+
+		const x = Math.max(0, Math.min(previewW - 20, existingCrop.x * rx));
+		const y = Math.max(0, Math.min(previewH - 20, existingCrop.y * ry));
+		const w = Math.min(previewW - x, existingCrop.width * rx);
+		const h = Math.min(previewH - y, existingCrop.height * ry);
+
+		if (w >= 20 && h >= 20) {
+			return [x, y, w, h];
+		}
+	}
+
+	return [0, 0, previewW, previewH];
+};
 
 const useCropStore = create<ICropState>((set) => ({
 	area: [0, 0, 0, 0],
@@ -35,7 +102,7 @@ const useCropStore = create<ICropState>((set) => ({
 	reset: () => {
 		set(({ element, size, scale }) => {
 			if (element instanceof HTMLVideoElement) {
-				element.currentTime = 0;
+				element.currentTime = 0.01;
 				element.pause();
 			}
 			return {
@@ -57,93 +124,129 @@ const useCropStore = create<ICropState>((set) => ({
 	},
 	setArea: (area: Area) => set({ area }),
 	setStep: (step: number) => set({ step }),
-	loadImage: (src: string) => {
+	loadImage: (
+		src: string,
+		existingCrop?: ICropRect,
+		detailsSize?: { width: number; height: number },
+	) => {
+		set({ area: [0, 0, 0, 0], src, fileLoading: true });
 		const image = document.createElement("img");
-		image.setAttribute("crossOrigin", "anonymous");
-		image.setAttribute("src", src);
-		image.addEventListener("load", () => {
-			const imageWidth = image.naturalWidth;
-			const imageHeight = image.naturalHeight;
-			const maxWidth = 700;
-			const maxHeight = 520;
+		image.crossOrigin = "anonymous";
 
-			// Calculate the scale factors for width and height
+		const onLoaded = () => {
+			const imageWidth = image.naturalWidth || 500;
+			const imageHeight = image.naturalHeight || 500;
+			const { maxWidth, maxHeight } = getCropConstraints();
+
 			const widthScale = maxWidth / imageWidth;
 			const heightScale = maxHeight / imageHeight;
-
-			// Choose the smaller scale factor to fit within both dimensions
 			const scaleFactor = Math.min(widthScale, heightScale);
+
+			const initialArea = computeInitialArea(
+				imageWidth,
+				imageHeight,
+				scaleFactor,
+				existingCrop,
+				detailsSize,
+			);
+
 			set({
-				area: [0, 0, imageWidth * scaleFactor, imageHeight * scaleFactor],
+				area: initialArea,
 				src,
 				size: { width: imageWidth, height: imageHeight },
+				element: image,
+				scale: scaleFactor,
+				fileLoading: false,
 			});
-			set({ element: image, scale: scaleFactor });
+		};
+
+		image.addEventListener("load", onLoaded);
+		image.addEventListener("error", () => {
+			if (image.crossOrigin) {
+				image.removeAttribute("crossOrigin");
+				image.src = src;
+			} else {
+				set({ fileLoading: false });
+			}
 		});
 		image.src = src;
 	},
-	loadVideo: (src: string) => {
-		set({ area: [0, 0, 0, 0], src });
+	loadVideo: (
+		src: string,
+		existingCrop?: ICropRect,
+		detailsSize?: { width: number; height: number },
+	) => {
+		set({ area: [0, 0, 0, 0], src, fileLoading: true });
 
 		const video = document.createElement("video");
-
 		video.setAttribute("playsinline", "");
-		video.preload = "metadata";
+		video.setAttribute("webkit-playsinline", "");
+		video.preload = "auto";
+		video.muted = true;
 		video.autoplay = false;
-
-		// Required when using a Service Worker on iOS Safari.
 		video.crossOrigin = "anonymous";
 
-		video.addEventListener("loadedmetadata", () => {
-			video.currentTime = 0.01;
+		let initialized = false;
+		const initVideoCrop = () => {
+			if (initialized) return;
 			const videoWidth = video.videoWidth;
 			const videoHeight = video.videoHeight;
+			if (!videoWidth || !videoHeight) return;
 
-			// Define the maximum dimensions
-			const maxWidth = 520;
-			const maxHeight = 400;
-
-			// Calculate the scale factors for width and height
+			initialized = true;
+			const { maxWidth, maxHeight } = getCropConstraints();
 			const widthScale = maxWidth / videoWidth;
 			const heightScale = maxHeight / videoHeight;
-
-			// Choose the smaller scale factor to fit within both dimensions
 			const scaleFactor = Math.min(widthScale, heightScale);
+
+			const initialArea = computeInitialArea(
+				videoWidth,
+				videoHeight,
+				scaleFactor,
+				existingCrop,
+				detailsSize,
+			);
 
 			set({
 				element: video,
 				scale: scaleFactor,
-				size: {
-					width: videoWidth,
-					height: videoHeight,
-				},
-				area: [0, 0, videoWidth * scaleFactor, videoHeight * scaleFactor],
-			});
-		});
-
-		video.addEventListener("canplay", () => {
-			set({
+				size: { width: videoWidth, height: videoHeight },
+				area: initialArea,
 				fileLoading: false,
 				step: 1,
 			});
+		};
+
+		video.addEventListener("loadedmetadata", () => {
+			try {
+				video.currentTime = 0.01;
+			} catch (_) {}
+			initVideoCrop();
 		});
 
-		video.addEventListener("ended", () => {
-			video.currentTime = 0;
+		video.addEventListener("canplay", () => {
+			initVideoCrop();
 		});
 
-		video.addEventListener("timeupdate", () => {
-			const start = 0;
-			const end = video.duration;
+		video.addEventListener("seeked", () => {
+			initVideoCrop();
+		});
 
-			if (video.currentTime > end) {
-				video.currentTime = start;
-			} else if (video.currentTime < start - 1) {
-				video.currentTime = start;
+		video.addEventListener("error", () => {
+			if (video.crossOrigin) {
+				video.removeAttribute("crossOrigin");
+				video.load();
+			} else {
+				set({ fileLoading: false });
 			}
 		});
 
 		video.src = src;
+		video.load();
+
+		if (video.readyState >= 1 && video.videoWidth > 0) {
+			initVideoCrop();
+		}
 	},
 }));
 

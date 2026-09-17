@@ -1,0 +1,21 @@
+# Định nghĩa các package của dự án (mặc định là thư mục hiện tại nếu không dùng monorepo)
+packages:
+  - "."
+
+# 1. Chuyển cấu hình "pnpm.overrides" vào đây
+overrides:
+  "@remotion/*": "4.0.525"
+  "remotion": "4.0.525"
+
+# 2. Chuyển "pnpm.onlyBuiltDependencies" vào đây và đổi tên thành "allowBuilds"
+allowBuilds:
+  '@biomejs/biome': true
+  '@firebase/util': true
+  '@google/genai': true
+  '@tailwindcss/oxide': true
+  bufferutil: true
+  canvas: true
+  esbuild: true
+  msw: true
+  protobufjs: true
+  sharp: true

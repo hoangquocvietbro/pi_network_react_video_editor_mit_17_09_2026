@@ -71,41 +71,81 @@ export const getNextZoom = (
 export function getFitZoomLevel(
 	totalLengthMs: number,
 	zoom = 1,
-	scrollOffset = 8, // Default fallback value
+	scrollOffset?: number,
 ): ITimelineScaleState {
-	const getVisibleWidth = () => {
-		const clampedScrollOffset = Math.max(0, scrollOffset);
+	if (!Number.isFinite(totalLengthMs) || totalLengthMs <= 0) {
+		return (
+			TIMELINE_ZOOM_LEVELS[7] || {
+				segments: 5,
+				index: 7,
+				zoom: 1 / 300,
+				unit: 300,
+			}
+		);
+	}
 
+	const getVisibleWidth = () => {
 		const timelineCanvas = document.getElementById(
 			"designcombo-timeline-canvas",
 		) as HTMLElement;
 		const offsetWidth =
-			timelineCanvas?.offsetWidth ?? document.body.offsetWidth;
+			timelineCanvas?.offsetWidth ||
+			(typeof window !== "undefined" ? window.innerWidth : 800);
+
+		// The canvas tracks have an internal left offset: TIMELINE_OFFSET_CANVAS_LEFT (16px).
+		// We add right padding (24px on mobile, 32px on desktop) so media items fit neatly
+		// inside the viewport with clean breathing room on both sides without overflowing.
+		const isSmall =
+			typeof window !== "undefined" && window.innerWidth < 768;
+		const horizontalPadding = isSmall ? 40 : 48;
 
 		// Use 1 to prevent NaN because of dividing by 0.
-		return Math.max(1, offsetWidth - clampedScrollOffset);
+		return Math.max(1, offsetWidth - horizontalPadding);
 	};
 
 	const getFullWidth = () => {
-		if (typeof totalLengthMs === "number") {
-			return timeMsToUnits(totalLengthMs, zoom);
-		}
-
-		return calculateTimelineWidth(totalLengthMs, zoom);
+		return timeMsToUnits(totalLengthMs, zoom);
 	};
 
-	const multiplier = getVisibleWidth() / getFullWidth();
+	const fullWidth = getFullWidth();
+	if (!Number.isFinite(fullWidth) || fullWidth <= 0) {
+		return (
+			TIMELINE_ZOOM_LEVELS[7] || {
+				segments: 5,
+				index: 7,
+				zoom: 1 / 300,
+				unit: 300,
+			}
+		);
+	}
+
+	const multiplier = getVisibleWidth() / fullWidth;
 	const targetZoom = zoom * multiplier;
+
+	if (!Number.isFinite(targetZoom) || targetZoom <= 0) {
+		return (
+			TIMELINE_ZOOM_LEVELS[7] || {
+				segments: 5,
+				index: 7,
+				zoom: 1 / 300,
+				unit: 300,
+			}
+		);
+	}
 
 	const fitZoomIndex = findIndex(TIMELINE_ZOOM_LEVELS, (level) => {
 		return level.zoom > targetZoom;
 	});
 
-	// const clampedIndex = clamp(fitZoomIndex, 0, TIMELINE_ZOOM_LEVELS.length - 1);
+	const clampedIndex = Math.max(
+		0,
+		Math.min(fitZoomIndex, TIMELINE_ZOOM_LEVELS.length - 1),
+	);
+	const matchedLevel = TIMELINE_ZOOM_LEVELS[clampedIndex];
 
 	return {
-		segments: 5,
-		index: fitZoomIndex,
+		segments: matchedLevel?.segments ?? 5,
+		index: clampedIndex,
 		zoom: targetZoom,
 		unit: 1 / targetZoom,
 	};

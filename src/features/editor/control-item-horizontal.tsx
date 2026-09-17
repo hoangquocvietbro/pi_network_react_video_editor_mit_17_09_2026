@@ -86,7 +86,7 @@ const ColorPickerControl = ({
 
 	return (
 		<div className="flex flex-col gap-4 p-4">
-			ß<Label className="font-sans text-xs font-semibold">Color</Label>
+			<Label className="font-sans text-xs font-semibold">Color</Label>
 			<div className="flex items-center pb-4 justify-center">
 				<ColorPicker
 					value={localValue}
@@ -334,6 +334,7 @@ export default function ControlItemHorizontal() {
 		setControItemDrawerOpen,
 		controItemDrawerOpen,
 		setLabelControlItem,
+		setCropTarget
 	} = useLayoutStore();
 
 	// Framer Motion controls
@@ -353,6 +354,10 @@ export default function ControlItemHorizontal() {
 		}
 	}, [activeIds, trackItemsMap]);
 	const handleMenuItemClick = (menuItem: string, label: string) => {
+		if (menuItem === "crop" && trackItem) {
+			setCropTarget(trackItem);
+			return;
+		}
 		if (!isLargeScreen) {
 			setControItemDrawerOpen(true);
 			setTypeControlItem(menuItem);
@@ -421,16 +426,23 @@ export default function ControlItemHorizontal() {
 
 	return (
 		<>
-			<div className="flex h-12 items-center border-t">
-				<ScrollArea className="w-full px-2" ref={scrollAreaRef}>
+			<div className="flex h-12 items-center border-t border-border/80 bg-background/95 backdrop-blur px-2 w-full select-none">
+				<div
+					ref={scrollAreaRef}
+					className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scrollbar-none py-1 w-full"
+					style={{
+						scrollbarWidth: "none",
+						msOverflowStyle: "none",
+						WebkitOverflowScrolling: "touch"
+					}}
+				>
 					{trackItem && (
 						<ActiveControlItem
 							trackItem={trackItem as ITrackItem & any}
 							handleMenuItemClick={handleMenuItemClick}
 						/>
 					)}
-					<ScrollBar orientation="horizontal" />
-				</ScrollArea>
+				</div>
 			</div>
 			{!isLargeScreen && controItemDrawerOpen && (
 				<motion.div
@@ -452,13 +464,24 @@ export default function ControlItemHorizontal() {
 						transition={{ type: "spring", damping: 25, stiffness: 300 }}
 					>
 						<div className="flex flex-col h-full">
-							<motion.div
-								className="flex items-center justify-center p-4 cursor-grab active:cursor-grabbing touch-none"
-								whileHover={{ scale: 1.05 }}
-								whileTap={{ scale: 0.95 }}
-							>
-								<motion.div className="h-1 w-24 bg-zinc-700 rounded-full" />
-							</motion.div>
+							<div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-border/50">
+								<span className="text-xs font-semibold text-zinc-300 capitalize">
+									{typeControlItem || "Options"}
+								</span>
+								<motion.div
+									className="h-1 w-16 bg-zinc-700 rounded-full cursor-grab active:cursor-grabbing touch-none"
+									whileHover={{ scale: 1.05 }}
+									whileTap={{ scale: 0.95 }}
+								/>
+								<Button
+									variant="ghost"
+									size="icon"
+									className="h-7 w-7 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800"
+									onClick={() => setControItemDrawerOpen(false)}
+								>
+									<Icons.close width={14} />
+								</Button>
+							</div>
 							<div className="flex-1 overflow-auto">
 								<ControlItem
 									trackItem={trackItem as ITrackItem & any}
@@ -487,18 +510,22 @@ const ItemGroup = ({
 }) => {
 	const { typeControlItem } = useLayoutStore();
 	return (
-		<div className="flex items-center justify-center space-x-4 min-w-max px-4">
-			{items.map(({ label, id }, index) => {
+		<div className="flex items-center gap-1.5 min-w-max px-1">
+			{items.map(({ label, id, icon: Icon }, index) => {
 				const isActive = typeControlItem === id;
 				return (
 					<Button
 						key={index}
 						onClick={() => handleMenuItemClick(id, label)}
-						variant={isActive ? "default" : "ghost"}
-						size={"sm"}
-						className="text-muted-foreground"
+						variant="outline"
+						size="sm"
+						className={`h-8 gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md border shadow-sm transition-all shrink-0 active:scale-95 ${isActive
+							? "border-primary bg-primary/15 text-primary font-semibold hover:bg-primary/20 hover:text-primary"
+							: "border-border/80 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 hover:text-white"
+							}`}
 					>
-						{label}
+						{Icon && <Icon width={13} />}
+						<span>{label}</span>
 					</Button>
 				);
 			})}
