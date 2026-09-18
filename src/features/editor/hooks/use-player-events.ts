@@ -1,6 +1,6 @@
 import useStore from "../store/use-store";
 import { useEffect } from "react";
-import { filter, subject } from "@designcombo/events";
+import { filter, subject } from "@/lib/events";
 import {
 	PLAYER_PAUSE,
 	PLAYER_PLAY,
@@ -9,8 +9,7 @@ import {
 	PLAYER_SEEK_BY,
 	PLAYER_TOGGLE_PLAY,
 } from "../constants/events";
-import { LAYER_PREFIX, LAYER_SELECTION } from "@designcombo/state";
-import { TIMELINE_SEEK, TIMELINE_PREFIX } from "@designcombo/timeline";
+import { LAYER_PREFIX, LAYER_SELECTION, TIMELINE_SEEK, TIMELINE_PREFIX } from "@/lib/events";
 import { getSafeCurrentFrame } from "../utils/time";
 
 const usePlayerEvents = () => {

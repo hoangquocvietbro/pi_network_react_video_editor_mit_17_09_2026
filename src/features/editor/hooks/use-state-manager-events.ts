@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useRef } from "react";
-import StateManager from "@designcombo/state";
+import StateManager from "@/lib/state-manager";
 import useStore from "../store/use-store";
-import { IAudio, ITrackItem, IVideo } from "@designcombo/types";
+import { IAudio, ITrackItem, IVideo } from "@/types/editor";
 import { audioDataManager } from "../player/lib/audio-data";
 
 // Global registry to prevent duplicate subscriptions

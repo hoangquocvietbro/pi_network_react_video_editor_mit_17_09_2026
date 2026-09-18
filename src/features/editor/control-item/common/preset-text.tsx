@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ChevronDown, CircleOff } from "lucide-react";
 import { useEffect, useState } from "react";
-import { IText, ITrackItem } from "@designcombo/types";
+import { IText, ITrackItem } from "@/types/editor";
 import { Label } from "@/components/ui/label";
 import useLayoutStore from "../../store/use-layout-store";
 import { useIsLargeScreen } from "@/hooks/use-media-query";

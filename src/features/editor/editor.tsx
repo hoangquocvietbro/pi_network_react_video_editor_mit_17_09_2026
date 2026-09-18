@@ -5,7 +5,7 @@ import Navbar from "./navbar";
 import useTimelineEvents from "./hooks/use-timeline-events";
 import Scene from "./scene";
 import { SceneRef } from "./scene/scene.types";
-import StateManager, { DESIGN_LOAD } from "@designcombo/state";
+import StateManager from "@/lib/state-manager";
 import { useEffect, useRef, useState } from "react";
 import {
 	ResizableHandle,
@@ -23,10 +23,10 @@ import useDataState from "./store/use-data-state";
 import { FONTS } from "./data/fonts";
 import FloatingControl from "./control-item/floating-controls/floating-control";
 import { useSceneStore } from "@/store/use-scene-store";
-import { dispatch } from "@designcombo/events";
+import { dispatch, DESIGN_LOAD } from "@/lib/events";
 import MenuListHorizontal from "./menu-list-horizontal";
 import { useIsLargeScreen } from "@/hooks/use-media-query";
-import { ITrackItem } from "@designcombo/types";
+import { ITrackItem } from "@/types/editor";
 import useLayoutStore from "./store/use-layout-store";
 import ControlItemHorizontal from "./control-item-horizontal";
 import { AuthProvider } from "../../components/auth/auth-provider";
@@ -162,15 +162,7 @@ const Editor = ({ tempId, id }: { tempId?: string; id?: string }) => {
 			container?.clientWidth ||
 			(timelineContainer.clientWidth - (isSmall ? 0 : 40));
 
-		timeline?.resize(
-			{
-				height: timelineContainer.clientHeight - 90,
-				width,
-			},
-			{
-				force: true,
-			},
-		);
+		timeline?.reRender?.();
 
 		// Trigger zoom recalculation when timeline is resized
 		setTimeout(() => {

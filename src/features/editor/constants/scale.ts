@@ -1,4 +1,4 @@
-import { ITimelineScaleState } from "@designcombo/types";
+import { ITimelineScaleState } from "@/types/editor";
 
 export const TIMELINE_ZOOM_LEVELS: ITimelineScaleState[] = [
 	{

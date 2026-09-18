@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { ADD_TEXT } from "@designcombo/state";
-import { dispatch } from "@designcombo/events";
+import { dispatch, ADD_TEXT } from "@/lib/events";
 import { useIsDraggingOverTimeline } from "../hooks/is-dragging-over-timeline";
 import Draggable from "@/components/shared/draggable";
 import { TEXT_ADD_PAYLOAD } from "../constants/payload";

@@ -5,10 +5,9 @@ import {
 } from "@/components/ui/popover";
 import ColorPicker from "@/components/color-picker";
 import { Input } from "@/components/ui/input";
-import { dispatch } from "@designcombo/events";
+import { dispatch, EDIT_OBJECT } from "@/lib/events";
 import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
-import { EDIT_OBJECT } from "@designcombo/state";
 interface ICaptionColors {
   appearedColor: string;
   activeColor: string;

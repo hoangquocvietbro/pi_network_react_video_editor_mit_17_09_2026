@@ -1,11 +1,13 @@
 import { SequenceItem } from "./sequence-item";
 import { useEffect, useState } from "react";
-import { dispatch, filter, subject } from "@designcombo/events";
 import {
+	dispatch,
+	filter,
+	subject,
 	EDIT_OBJECT,
 	EDIT_TEMPLATE_ITEM,
 	ENTER_EDIT_MODE,
-} from "@designcombo/state";
+} from "@/lib/events";
 import { groupTrackItems } from "../utils/track-items";
 import { calculateTextHeight } from "../utils/text";
 import { useCurrentFrame } from "remotion";

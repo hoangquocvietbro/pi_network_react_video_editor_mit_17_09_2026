@@ -14,7 +14,7 @@ import {
   DialogTitle,
 } from '../ui/dialog';
 import { toast } from 'sonner';
-import type { IDesign } from '@designcombo/types';
+import type { IDesign } from "@/types/editor";
 
 interface CreateProjectDialogProps {
   open: boolean;

@@ -2,7 +2,7 @@ import {
   IBasicAnimation,
   ICompositionAnimation,
   ITrackItem,
-} from "@designcombo/types";
+} from "@/types/editor";
 import { Easing } from "remotion";
 import { Animation } from "../player/animated";
 

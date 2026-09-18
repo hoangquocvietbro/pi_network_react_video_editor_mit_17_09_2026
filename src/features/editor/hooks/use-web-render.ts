@@ -6,7 +6,7 @@
 
 import { renderMediaOnWeb } from '@remotion/web-renderer';
 import { useState, useCallback, useRef } from 'react';
-import type { IDesign } from '@designcombo/types';
+import type { IDesign } from "@/types/editor";
 import { checkCSRSupport, downloadBlob } from '../utils/web-renderer';
 
 export interface RenderProgress {

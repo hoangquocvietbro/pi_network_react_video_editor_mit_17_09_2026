@@ -1,4 +1,4 @@
-import { ItemType } from "@designcombo/types";
+import { ItemType } from "@/types/editor";
 import { useCallback, useEffect, useState } from "react";
 import { Icons } from "@/components/shared/icons";
 import { Button } from "@/components/ui/button";

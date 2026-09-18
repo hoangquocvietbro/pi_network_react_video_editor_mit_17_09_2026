@@ -13,7 +13,7 @@
 
 import React from "react";
 import { AbsoluteFill } from "remotion";
-import type { IDesign } from "@designcombo/types";
+import type { IDesign } from "@/types/editor";
 import { CompositionContent } from "./composition-core";
 
 export interface SSRCompositionProps {

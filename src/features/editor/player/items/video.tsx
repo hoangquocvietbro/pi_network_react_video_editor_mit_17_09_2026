@@ -1,4 +1,4 @@
-import { IVideo } from "@designcombo/types";
+import { IVideo } from "@/types/editor";
 import { BaseSequence, SequenceItemOptions } from "../base-sequence";
 import { calculateMediaStyles } from "../styles";
 import { OffthreadVideo } from "remotion";

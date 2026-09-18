@@ -3,14 +3,14 @@ import { HorizontalScroll } from "@/components/ui/horizontal-scroll";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { dispatch } from "@designcombo/events";
 import {
+	dispatch,
 	ADD_LINEAL_AUDIO_BARS,
 	ADD_RADIAL_AUDIO_BARS,
 	ADD_WAVE_AUDIO_BARS,
 	ADD_HILL_AUDIO_BARS,
-} from "@designcombo/state";
-import { generateId } from "@designcombo/timeline";
+} from "@/lib/events";
+import { generateId } from "../utils/id";
 import { ChevronLeft, ChevronRight, Ellipsis } from "lucide-react";
 import { useState } from "react";
 

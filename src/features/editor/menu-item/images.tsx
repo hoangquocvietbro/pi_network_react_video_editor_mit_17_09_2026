@@ -1,11 +1,10 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { dispatch } from "@designcombo/events";
-import { generateId } from "@designcombo/timeline";
+import { dispatch, ADD_ITEMS } from "@/lib/events";
+import { generateId } from "../utils/id";
 import Draggable from "@/components/shared/draggable";
-import { IImage } from "@designcombo/types";
+import { IImage } from "@/types/editor";
 import React, { useState, useEffect } from "react";
 import { useIsDraggingOverTimeline } from "../hooks/is-dragging-over-timeline";
-import { ADD_ITEMS } from "@designcombo/state";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Loader2 } from "lucide-react";

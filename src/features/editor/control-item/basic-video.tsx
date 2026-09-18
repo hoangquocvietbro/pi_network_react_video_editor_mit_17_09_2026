@@ -1,5 +1,5 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { IBoxShadow, ITrackItem, IVideo } from "@designcombo/types";
+import { IBoxShadow, ITrackItem, IVideo } from "@/types/editor";
 import Outline from "./common/outline";
 import Shadow from "./common/shadow";
 import Opacity from "./common/opacity";
@@ -9,8 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Crop } from "lucide-react";
 import Volume from "./common/volume";
 import React, { useEffect, useState } from "react";
-import { dispatch } from "@designcombo/events";
-import { EDIT_OBJECT } from "@designcombo/state";
+import { dispatch, EDIT_OBJECT } from "@/lib/events";
 import Speed from "./common/speed";
 import useLayoutStore from "../store/use-layout-store";
 import { Label } from "@/components/ui/label";

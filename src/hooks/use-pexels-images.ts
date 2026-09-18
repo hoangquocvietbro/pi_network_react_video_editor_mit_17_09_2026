@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { IImage } from "@designcombo/types";
+import { IImage } from "@/types/editor";
 
 interface PexelsImage extends Partial<IImage> {
 	metadata?: {

@@ -1,4 +1,4 @@
-import { IDesign } from "@designcombo/types";
+import { IDesign } from "@/types/editor";
 import { create } from "zustand";
 import { renderMediaOnWeb } from "@remotion/web-renderer";
 import { RenderableComposition } from "../player/renderable-composition";

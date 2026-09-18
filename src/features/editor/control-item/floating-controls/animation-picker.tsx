@@ -1,7 +1,6 @@
 import { X } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ADD_ANIMATION } from "@designcombo/state";
-import { dispatch } from "@designcombo/events";
+import { dispatch, ADD_ANIMATION } from "@/lib/events";
 import useStore from "../../store/use-store";
 import { Animation, presets } from "../../player/animated";
 import React, { useRef } from "react";

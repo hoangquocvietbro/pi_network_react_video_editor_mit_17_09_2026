@@ -1,4 +1,4 @@
-import { ISize, ITrackItem } from "@designcombo/types";
+import { ISize, ITrackItem } from "@/types/editor";
 import { AbsoluteFill, Sequence } from "remotion";
 import { calculateFrames } from "../utils/frames";
 import { calculateContainerStyles } from "./styles";

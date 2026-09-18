@@ -1,10 +1,9 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import useDataState from "../store/use-data-state";
 import { loadFonts } from "../utils/fonts";
-import { dispatch } from "@designcombo/events";
-import { ADD_ANIMATION, EDIT_OBJECT } from "@designcombo/state";
+import { dispatch, ADD_ANIMATION, EDIT_OBJECT } from "@/lib/events";
 import React, { useEffect, useState } from "react";
-import { IBoxShadow, ICaption, ITrackItem } from "@designcombo/types";
+import { IBoxShadow, ICaption, ITrackItem } from "@/types/editor";
 import Outline from "./common/outline";
 import Shadow from "./common/shadow";
 import CaptionWords from "./common/caption-words";
@@ -115,8 +114,8 @@ const BasicCaption = ({ trackItem }: { trackItem: ITrackItem & ICaption }) => {
       fontSizeDisplay: (trackItem.details.fontSize || 62) + "px",
       fontFamily: selectedFont?.family || "Open Sans",
       fontFamilyDisplay: selectedFont?.family || "Open Sans",
-      opacity: trackItem.details.opacity || 1,
-      opacityDisplay: (trackItem.details.opacity.toString() || "100") + "%",
+      opacity: trackItem.details?.opacity ?? 100,
+      opacityDisplay: `${trackItem.details?.opacity ?? 100}%`,
       textAlign: trackItem.details.textAlign || "left",
       textDecoration: trackItem.details.textDecoration || "none",
       borderWidth: trackItem.details.borderWidth || 0,

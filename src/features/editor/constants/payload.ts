@@ -1,4 +1,4 @@
-import { generateId } from "@designcombo/timeline";
+import { generateId } from "../utils/id";
 import { DEFAULT_FONT } from "./font";
 
 export const TEXT_ADD_PAYLOAD = {
@@ -15,6 +15,7 @@ export const TEXT_ADD_PAYLOAD = {
 		fontUrl: DEFAULT_FONT.url,
 		fontFamily: DEFAULT_FONT.postScriptName,
 		color: "#ffffff",
+		opacity: 100,
 		wordWrap: "break-word",
 		textAlign: "center",
 		borderWidth: 0,

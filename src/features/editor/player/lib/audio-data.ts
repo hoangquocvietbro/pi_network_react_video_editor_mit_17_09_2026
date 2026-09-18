@@ -1,4 +1,4 @@
-import { IAudio, ITrackItem, IVideo } from "@designcombo/types";
+import { IAudio, ITrackItem, IVideo } from "@/types/editor";
 import { AudioData, getAudioData, visualizeAudio } from "@remotion/media-utils";
 import { isEqual } from "lodash";
 

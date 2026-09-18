@@ -11,7 +11,7 @@
  */
 
 import React from "react";
-import { ISize, ITrackItem, ITrackItemsMap, ITransition } from "@designcombo/types";
+import { ISize, ITrackItem, ITrackItemsMap, ITransition } from "@/types/editor";
 import { TransitionSeries, Transitions } from "../../../modules/transitions/index.es.js";
 import { groupTrackItems } from "../utils/track-items";
 import { SequenceItem } from "./sequence-item";

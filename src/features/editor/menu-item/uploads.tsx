@@ -1,5 +1,4 @@
-import { ADD_AUDIO, ADD_IMAGE, ADD_VIDEO, EDIT_OBJECT, LAYER_DELETE } from "@designcombo/state";
-import { dispatch } from "@designcombo/events";
+import { dispatch, ADD_AUDIO, ADD_IMAGE, ADD_VIDEO, EDIT_OBJECT, LAYER_DELETE } from "@/lib/events";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import {
@@ -12,7 +11,7 @@ import {
 	AlertTriangle,
 	X
 } from "lucide-react";
-import { generateId } from "@designcombo/timeline";
+import { generateId } from "../utils/id";
 import { Button } from "@/components/ui/button";
 import useUploadStore, { LocalMedia } from "../store/use-upload-store";
 import ModalUpload, { extractVideoThumbnail, truncateFileName } from "@/components/modal-upload";

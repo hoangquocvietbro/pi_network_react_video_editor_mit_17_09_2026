@@ -6,7 +6,7 @@ import {
 	ITrackItem,
 	ITrackItemAndDetails,
 	IVideo,
-} from "@designcombo/types";
+} from "@/types/editor";
 import { useEffect, useState } from "react";
 import BasicText from "./basic-text";
 import BasicImage from "./basic-image";

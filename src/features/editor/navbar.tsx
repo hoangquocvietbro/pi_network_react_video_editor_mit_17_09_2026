@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { dispatch } from "@designcombo/events";
-import { HISTORY_UNDO, HISTORY_REDO, DESIGN_RESIZE, EDIT_OBJECT } from "@designcombo/state";
+import {
+	dispatch,
+	HISTORY_UNDO,
+	HISTORY_REDO,
+	DESIGN_RESIZE,
+	EDIT_OBJECT,
+} from "@/lib/events";
 import useStore from "./store/use-store";
 import { Icons } from "@/components/shared/icons";
 
@@ -37,9 +42,9 @@ import {
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
-import type StateManager from "@designcombo/state";
-import { generateId } from "@designcombo/timeline";
-import type { IDesign } from "@designcombo/types";
+import type StateManager from "@/lib/state-manager";
+import { generateId } from "./utils/id";
+import type { IDesign } from "@/types/editor";
 import { useDownloadState } from "./store/use-download-state";
 import { useAuthStore } from "../../store/use-auth-store";
 import { useExportLimitStore } from "../../store/use-export-limit-store";

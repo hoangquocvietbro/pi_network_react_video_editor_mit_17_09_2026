@@ -11,7 +11,7 @@
 import React from "react";
 import { Composition } from "remotion";
 import { SSRComposition } from "../features/editor/player/ssr-composition";
-import type { IDesign, ITrackItem } from "@designcombo/types";
+import type { IDesign, ITrackItem } from "@/types/editor";
 
 // Default empty design for type safety
 const defaultDesign: IDesign = {

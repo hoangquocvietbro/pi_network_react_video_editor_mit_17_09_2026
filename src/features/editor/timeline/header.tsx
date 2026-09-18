@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { dispatch } from "@designcombo/events";
 import {
+	dispatch,
 	ACTIVE_SPLIT,
 	LAYER_CLONE,
 	LAYER_DELETE,
 	TIMELINE_SCALE_CHANGED,
-} from "@designcombo/state";
+	TIMELINE_PREFIX,
+} from "@/lib/events";
 import { PLAYER_PAUSE, PLAYER_PLAY, PLAYER_SEEK, PLAYER_SEEK_BY } from "../constants/events";
 import { frameToTimeString, getCurrentTime, timeToString } from "../utils/time";
 import useStore from "../store/use-store";
@@ -20,10 +21,9 @@ import { useCurrentPlayerFrame } from "../hooks/use-current-frame";
 import { Slider } from "@/components/ui/slider";
 import { useEffect, useState } from "react";
 import useUpdateAnsestors from "../hooks/use-update-ansestors";
-import { ITimelineScaleState } from "@designcombo/types";
+import { ITimelineScaleState } from "@/types/editor";
 import { useIsLargeScreen } from "@/hooks/use-media-query";
 import { useTimelineOffsetX } from "../hooks/use-timeline-offset";
-import { TIMELINE_PREFIX } from "@designcombo/timeline";
 
 const IconPlayerPlayFilled = ({ size }: { size: number }) => (
 	<svg

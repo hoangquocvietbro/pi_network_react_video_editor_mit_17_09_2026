@@ -1,4 +1,4 @@
-import { ISize } from "@designcombo/types";
+import { ISize } from "@/types/editor";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export type ZoomPreset = "fit" | 0.25 | 0.5 | 0.75 | 1 | 1.5 | 2;

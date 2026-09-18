@@ -7,9 +7,8 @@ import useLayoutStore from "../../store/use-layout-store";
 import useClickOutside from "../../hooks/useClickOutside";
 import { ICompactFont, IFont } from "../../interfaces/editor";
 import { loadFonts } from "../../utils/fonts";
-import { dispatch } from "@designcombo/events";
-import { EDIT_OBJECT } from "@designcombo/state";
-import { ITrackItem } from "@designcombo/types";
+import { dispatch, EDIT_OBJECT } from "@/lib/events";
+import { ITrackItem } from "@/types/editor";
 
 export const onChangeFontFamily = async (
 	font: ICompactFont,

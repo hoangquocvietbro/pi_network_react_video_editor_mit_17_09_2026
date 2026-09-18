@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { dispatch } from "@designcombo/events";
-import { EDIT_OBJECT } from "@designcombo/state";
-import { ITrackItem } from "@designcombo/types";
+import { dispatch, EDIT_OBJECT } from "@/lib/events";
+import { ITrackItem } from "@/types/editor";
 
 export default function PlaybackRate({ trackItem }: { trackItem: ITrackItem }) {
 	const handleChangePlaybackRate = (value: number) => {

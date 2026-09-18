@@ -1,4 +1,4 @@
-import { IImage } from "@designcombo/types";
+import { IImage } from "@/types/editor";
 import { BaseSequence, SequenceItemOptions } from "../base-sequence";
 import { calculateMediaStyles } from "../styles";
 import { calculateFrames } from "../../utils/frames";

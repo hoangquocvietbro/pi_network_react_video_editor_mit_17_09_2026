@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { IBoxShadow } from "@designcombo/types";
+import { IBoxShadow } from "@/types/editor";
 import { useEffect, useState } from "react";
 import {
 	Popover,

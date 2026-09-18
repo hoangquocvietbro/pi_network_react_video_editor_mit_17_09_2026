@@ -6,7 +6,7 @@ import {
 	ITrackItem,
 	ITrackItemAndDetails,
 	IVideo,
-} from "@designcombo/types";
+} from "@/types/editor";
 import useLayoutStore from "./store/use-layout-store";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -18,8 +18,7 @@ import BasicVideo from "./control-item/basic-video";
 import BasicAudio from "./control-item/basic-audio";
 import { motion, PanInfo, useAnimation } from "framer-motion";
 import ColorPicker from "@/components/color-picker";
-import { dispatch } from "@designcombo/events";
-import { EDIT_OBJECT } from "@designcombo/state";
+import { dispatch, EDIT_OBJECT } from "@/lib/events";
 import { Label } from "@/components/ui/label";
 
 const ActiveControlItem = ({

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Selection, Moveable } from "@interactify/toolkit";
+import Moveable from "react-moveable";
+import Selection from "selecto";
 import { getIdFromClassName } from "../utils/scene";
-import { dispatch } from "@designcombo/events";
-import { EDIT_OBJECT } from "@designcombo/state";
+import { dispatch, EDIT_OBJECT } from "@/lib/events";
 import {
 	SelectionInfo,
 	emptySelection,
@@ -10,7 +10,7 @@ import {
 	getTargetById,
 } from "../utils/target";
 import useStore from "../store/use-store";
-import StateManager from "@designcombo/state";
+import StateManager from "@/lib/state-manager";
 import { getCurrentTime } from "../utils/time";
 
 let holdGroupPosition: Record<string, any> | null = null;
@@ -389,16 +389,34 @@ export function SceneInteractions({
 			}}
 			onResizeEnd={({ target }) => {
 				const targetId = getIdFromClassName(target.className) as string;
-				const textDiv = target.firstElementChild?.firstElementChild
-					?.firstElementChild as HTMLDivElement;
+				if (!targetId) return;
+
+				const animationDiv = target.firstElementChild
+					?.firstElementChild as HTMLDivElement | null;
+				const textDiv = (animationDiv?.firstElementChild ||
+					target.querySelector("[contenteditable]")) as HTMLDivElement | null;
+
+				const width =
+					Number.parseFloat(target.style.width) || target.clientWidth || 100;
+				const height =
+					Number.parseFloat(target.style.height) || target.clientHeight || 100;
+
+				const details: Record<string, any> = {
+					width,
+					height,
+				};
+
+				if (textDiv?.style?.fontSize) {
+					const fontSize = Number.parseFloat(textDiv.style.fontSize);
+					if (!isNaN(fontSize) && fontSize > 0) {
+						details.fontSize = fontSize;
+					}
+				}
+
 				dispatch(EDIT_OBJECT, {
 					payload: {
 						[targetId]: {
-							details: {
-								width: Number.parseFloat(target.style.width),
-								height: Number.parseFloat(target.style.height),
-								fontSize: Number.parseFloat(textDiv.style.fontSize),
-							},
+							details,
 						},
 					},
 				});

@@ -13,7 +13,7 @@
 
 import { AbsoluteFill, useCurrentFrame, Sequence, useVideoConfig } from "remotion";
 import { Video as CSRVideo, Audio as CSRAudio } from "@remotion/media";
-import type { IDesign, ITrackItem, IVideo, IAudio, IImage, IText } from "@designcombo/types";
+import type { IDesign, ITrackItem, IVideo, IAudio, IImage, IText } from "@/types/editor";
 import { Img } from "remotion";
 
 interface RenderableCompositionProps {

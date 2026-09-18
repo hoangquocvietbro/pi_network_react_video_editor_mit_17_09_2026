@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ITextDetails } from "@designcombo/types";
+import { ITextDetails } from "@/types/editor";
 
 const TextLayer: React.FC<{
 	id: string;

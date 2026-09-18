@@ -13,8 +13,8 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { toast } from 'sonner';
-import type StateManager from '@designcombo/state';
-import type { IDesign } from '@designcombo/types';
+import type StateManager from '@/lib/state-manager';
+import type { IDesign } from "@/types/editor";
 import { ExportLoginPrompt } from '../auth/export-login-prompt';
 
 interface ProjectSaveButtonProps {

@@ -1,13 +1,12 @@
 import Draggable from "@/components/shared/draggable";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { HorizontalScroll } from "@/components/ui/horizontal-scroll";
-import { dispatch } from "@designcombo/events";
-import { ADD_AUDIO, ADD_ITEMS } from "@designcombo/state";
-import { IAudio } from "@designcombo/types";
+import { dispatch, ADD_AUDIO, ADD_ITEMS } from "@/lib/events";
+import { IAudio } from "@/types/editor";
 import { Music } from "lucide-react";
 import { useIsDraggingOverTimeline } from "../hooks/is-dragging-over-timeline";
 import React from "react";
-import { generateId } from "@designcombo/timeline";
+import { generateId } from "../utils/id";
 import { AUDIOS } from "../data/audio";
 
 export const Audios = () => {

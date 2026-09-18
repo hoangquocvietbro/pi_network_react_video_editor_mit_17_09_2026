@@ -1,6 +1,5 @@
-import { dispatch } from "@designcombo/events";
-import { ADD_AUDIO, ADD_IMAGE, ADD_VIDEO } from "@designcombo/state";
-import { generateId } from "@designcombo/timeline";
+import { dispatch, ADD_AUDIO, ADD_IMAGE, ADD_VIDEO } from "@/lib/events";
+import { generateId } from "../utils/id";
 import React, { useCallback, useState } from "react";
 
 enum AcceptedDropTypes {

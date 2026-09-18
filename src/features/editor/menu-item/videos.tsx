@@ -1,9 +1,8 @@
 import Draggable from "@/components/shared/draggable";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { dispatch } from "@designcombo/events";
-import { ADD_VIDEO } from "@designcombo/state";
-import { generateId } from "@designcombo/timeline";
-import { IVideo } from "@designcombo/types";
+import { dispatch, ADD_VIDEO } from "@/lib/events";
+import { generateId } from "../utils/id";
+import { IVideo } from "@/types/editor";
 import React, { useState, useEffect } from "react";
 import { useIsDraggingOverTimeline } from "../hooks/is-dragging-over-timeline";
 import { Input } from "@/components/ui/input";

@@ -1,6 +1,5 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { dispatch } from "@designcombo/events";
-import { ADD_ANIMATION } from "@designcombo/state";
+import { dispatch, ADD_ANIMATION } from "@/lib/events";
 import { X } from "lucide-react";
 import React, { useRef } from "react";
 import { Animation, presets } from "../../player/animated";

@@ -1,5 +1,5 @@
 import React from "react";
-import { IAudio, IImage, ITrackItem, IText, IVideo } from "@designcombo/types";
+import { IAudio, IImage, ITrackItem, IText, IVideo } from "@/types/editor";
 import { Audio, Image, Text, Video } from "./items";
 import { SequenceItemOptions } from "./base-sequence";
 

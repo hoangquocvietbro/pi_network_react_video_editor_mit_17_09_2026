@@ -1,4 +1,4 @@
-import { IAudio } from "@designcombo/types";
+import { IAudio } from "@/types/editor";
 import { BaseSequence, SequenceItemOptions } from "../base-sequence";
 import { Audio as RemotionAudio } from "remotion";
 

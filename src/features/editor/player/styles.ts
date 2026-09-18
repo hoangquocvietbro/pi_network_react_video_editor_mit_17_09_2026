@@ -1,4 +1,4 @@
-import { IImage, IText, ITrackItem } from "@designcombo/types";
+import { IImage, IText, ITrackItem } from "@/types/editor";
 
 export const calculateCropStyles = (
 	details: IImage["details"],

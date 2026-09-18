@@ -1,4 +1,4 @@
-import { IDesign } from "@designcombo/types";
+import { IDesign } from "@/types/editor";
 import { create } from "zustand";
 
 interface ISceneStore {

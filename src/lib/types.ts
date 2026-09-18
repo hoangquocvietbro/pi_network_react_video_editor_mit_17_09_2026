@@ -1,6 +1,6 @@
 // Types based on Kysely schema to replace Prisma imports
 // File: lib/types.ts
-import type { IDesign } from '@designcombo/types';
+import type { IDesign } from "@/types/editor";
 
 // ==========================================
 // 1. CÁC INTERFACE CHO DATABASE (Dành cho Kysely)

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { filter, subject } from "@designcombo/events";
-import { DRAG_END, DRAG_PREFIX, DRAG_START } from "@designcombo/timeline";
+import { filter, subject, DRAG_END, DRAG_PREFIX, DRAG_START } from "@/lib/events";
 
 export const useIsDraggingOverTimeline = () => {
 	const [isDraggingOverTimeline, setIsDraggingOverTimeline] = useState(false);

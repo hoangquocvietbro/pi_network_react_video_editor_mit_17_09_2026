@@ -1,4 +1,4 @@
-import Timeline from "@designcombo/timeline";
+import type { TimelineState } from "@xzdarcy/react-timeline-editor";
 import {
 	IComposition,
 	ISize,
@@ -8,8 +8,8 @@ import {
 	ITrackItem,
 	ITransition,
 	ItemStructure,
-} from "@designcombo/types";
-import { Moveable } from "@interactify/toolkit";
+} from "@/types/editor";
+import Moveable from "react-moveable";
 import { PlayerRef } from "@remotion/player";
 import { create } from "zustand";
 
@@ -26,8 +26,8 @@ interface ITimelineStore {
 	trackItemsMap: Record<string, ITrackItem>;
 	structure: ItemStructure[];
 	activeIds: string[];
-	timeline: Timeline | null;
-	setTimeline: (timeline: Timeline) => void;
+	timeline: TimelineState | null;
+	setTimeline: (timeline: TimelineState | null) => void;
 	setScale: (scale: ITimelineScaleState) => void;
 	setScroll: (scroll: ITimelineScrollState) => void;
 	playerRef: React.RefObject<PlayerRef> | null;
@@ -88,7 +88,7 @@ const useStore = create<ITimelineStore>((set) => ({
 	trackItemsMap: {},
 	sceneMoveableRef: null,
 
-	setTimeline: (timeline: Timeline) =>
+	setTimeline: (timeline: TimelineState | null) =>
 		set(() => ({
 			timeline: timeline,
 		})),

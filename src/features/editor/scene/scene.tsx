@@ -1,7 +1,7 @@
 import { Player } from "../player";
 import { useRef, useImperativeHandle, forwardRef } from "react";
 import useStore from "../store/use-store";
-import StateManager from "@designcombo/state";
+import StateManager from "@/lib/state-manager";
 import SceneEmpty from "./empty";
 import Board from "./board";
 import useZoom from "../hooks/use-zoom";

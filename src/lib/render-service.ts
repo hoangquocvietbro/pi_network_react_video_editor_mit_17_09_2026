@@ -9,7 +9,7 @@
 import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
-import type { IDesign } from "@designcombo/types";
+import type { IDesign } from "@/types/editor";
 import { SERVER_ENV } from "./server-env";
 import { PUBLIC_ENV } from "./public-env";
 // Configuration

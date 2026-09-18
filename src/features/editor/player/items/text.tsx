@@ -1,4 +1,4 @@
-import { IText } from "@designcombo/types";
+import { IText } from "@/types/editor";
 import { BaseSequence, SequenceItemOptions } from "../base-sequence";
 import { calculateTextStyles } from "../styles";
 import MotionText from "../motion-text";
